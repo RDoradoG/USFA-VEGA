@@ -29,8 +29,6 @@ export async function getAPIs(
 
     const response = await apiClient.get(url)
 
-    return response
-
     return {
         rows: response.data.data,
         meta: {

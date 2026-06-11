@@ -20,10 +20,12 @@ const propsDef = defineProps({
 });
 
 const isJefe = user.rol === 'JEFE';
-const isOwner = propsDef.lead?.usuario_id === user.id;
+const isOwner = propsDef.lead?.usuario_id === user.id || propsDef.lead === undefined;
+
+const canChangeState = user.rol === 'JEFE' || (isOwner && propsDef.lead !== undefined)
 
 const canEdit = isJefe || isOwner;
-const canCreate = isJefe;
+//const canCreate = isJefe;
 
 const genreOptions = [
   {id: 'Masculino', value: 'Masculino'},
@@ -134,13 +136,13 @@ const submit = () => {
     <div class="grid grid-cols-3 gap-4">
       <div>
         <Label>Estado</Label>
-        <Selectlist v-model="form.estado_id" :options="estados" :key="'id'" :value="'nombre'" :disabled="!canEdit" :class="{'border-red-500': form.errors.estado_id}" />
+        <Selectlist v-model="form.estado_id" :options="estados" :key="'id'" :value="'nombre'" :disabled="!canChangeState" :class="{'border-red-500': form.errors.estado_id}" />
         <p v-if="form.errors.estado_id" class="text-red-500 text-sm mt-1">{{ form.errors.estado_id }}</p>
       </div>
 
       <div>
         <Label>Asesor</Label>
-        <Selectlist v-model="form.usuario_id" :options="usuarios" :key="'id'" :value="'nombre'" :disabled="!canEdit" />
+        <Selectlist v-model="form.usuario_id" :options="usuarios" :key="'id'" :value="'nombre'" :disabled="!isJefe" />
       </div>
 
       <div>
@@ -159,7 +161,7 @@ const submit = () => {
 
       <div>
         <Label>Fecha registro</Label>
-        <Datepicker v-model="form.fecha_registro" :disabled="!canEdit" />
+        <Datepicker v-model="form.fecha_registro" :disabled="!isJefe" />
       </div>
 
       <div>
@@ -176,7 +178,7 @@ const submit = () => {
 
     <!-- BOTON -->
     <div>
-      <button v-if="canEdit && (isJefe || propsDef.lead)" class="bg-green-500 text-white px-6 py-2 rounded">
+      <button v-if="canEdit" class="bg-green-500 text-white px-6 py-2 rounded">
         Guardar
       </button>
     </div>

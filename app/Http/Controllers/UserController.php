@@ -24,7 +24,7 @@ class UserController extends BaseController
     public function index()
     {
         return Inertia::render('Users/Index', [
-            'usuarios' => User::latest()->paginate(10)
+            'usuarios' => User::all()
         ]);
     }
 

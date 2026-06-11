@@ -1,5 +1,7 @@
 <script setup>
 import { useForm, usePage } from '@inertiajs/vue3';
+import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
+import Input from '@/components/ui/input/Input.vue';
 
 const props = defineProps({
   lead: Object
@@ -14,6 +16,20 @@ const form = useForm({
   observacion: ''
 });
 
+const types = [
+  {id: 'LLAMADA', value: 'LLAMADA'},
+  {id: 'WHATSAPP', value: 'WHATSAPP'},
+  {id: 'EMAIL', value: 'EMAIL'},
+  {id: 'OTRO', value: 'OTRO'}
+]
+
+const results = [
+  {id: 'NO RESPONDE', value: 'NO RESPONDE'},
+  {id: 'INTERESADO', value: 'INTERESADO'},
+  {id: 'NO INTERESADO', value: 'NO INTERESADO'},
+  {id: 'SEGUIMIENTO', value: 'SEGUIMIENTO'}
+]
+
 const submit = () => {
   form.post(`/leads/${props.lead.id}/seguimientos`, {
     preserveScroll: true
@@ -27,27 +43,28 @@ const submit = () => {
     <h2 class="text-lg font-bold mb-4">Seguimientos</h2>
 
     <!-- FORM -->
-    <form @submit.prevent="submit" class="grid grid-cols-3 gap-3 mb-6">
+    <form @submit.prevent="submit" class="mb-6">
 
-      <select v-model="form.tipo" class="input">
-        <option value="">Tipo</option>
-        <option>LLAMADA</option>
-        <option>WHATSAPP</option>
-        <option>EMAIL</option>
-        <option>OTRO</option>
-      </select>
+      <div class="grid grid-cols-2 gap-3">
 
-      <select v-model="form.resultado" class="input">
-        <option value="">Resultado</option>
-        <option>NO_RESPONDE</option>
-        <option>INTERESADO</option>
-        <option>NO_INTERESADO</option>
-        <option>SEGUIMIENTO</option>
-      </select>
+        <div>
+          <Label>Tipo</Label>
+          <Selectlist v-model="form.tipo" :options="types" />
+        </div>
 
-      <input v-model="form.observacion" placeholder="Observación" class="input" />
+        <div>
+          <Label>Resultado</Label>
+          <Selectlist v-model="form.resultado" :options="results" />
+        </div>
 
-      <button class="col-span-3 bg-blue-500 text-white py-2 rounded">
+      </div>
+
+      <div>
+        <Label>Observación</Label>
+        <Input v-model="form.observacion" placeholder="Observación" class="input" />
+      </div>
+
+      <button class="col-span-3 bg-blue-500 text-white py-2 rounded mt-2 w-full">
         Registrar seguimiento
       </button>
     </form>

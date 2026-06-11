@@ -2,6 +2,7 @@
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Modal from '@/components/Modal.vue';
+import { PencilRuler, Trash2 } from 'lucide-vue-next';
 
 const props = defineProps({
   usuarios: Object
@@ -51,7 +52,7 @@ const eliminar = () => {
       </thead>
 
       <tbody>
-        <tr v-for="u in usuarios.data" :key="u.id">
+        <tr v-for="u in usuarios" :key="u.id">
           <td class="px-4 py-2 border">{{ u.nombre }}</td>
           <td class="px-4 py-2 border">{{ u.email }}</td>
           <td class="px-4 py-2 border">
@@ -66,16 +67,18 @@ const eliminar = () => {
           </td>
 
           <td class="text-right space-x-2 px-4 py-2 border">
-            <Link :href="`/users/${u.id}/edit`" class="text-blue-600">
-              Editar
-            </Link>
+            <div class="flex justify-end items-center gap-2">
+              <Link :href="`/users/${u.id}/edit`" class="text-blue-600 flex items-center">
+                <component :is="PencilRuler" />
+              </Link>
 
-            <button
-              @click="openModal(u)"
-              class="text-red-600"
-            >
-              Eliminar
-            </button>
+              <button
+                @click="openModal(u)"
+                class="text-red-600 flex items-center"
+              >
+                <component :is="Trash2" />
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
