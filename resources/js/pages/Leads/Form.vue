@@ -2,9 +2,10 @@
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
-import Datepicker from '@/components/ui/datepicker/Datepicker.vue';
+//import Datepicker from '@/components/ui/datepicker/Datepicker.vue';
 import Textarea from '@/components/ui/textarea/Textarea.vue';
 import { useForm, usePage  } from '@inertiajs/vue3';
+import dayjs from 'dayjs'
 
 const { props } = usePage();
 const user = props.auth.user;
@@ -17,6 +18,8 @@ const propsDef = defineProps({
   estados: Array,
   usuarios: Array,
   fuentes: Array,
+  codigos_pais: Array,
+  promociones: Array
 });
 
 const isJefe = user.rol === 'JEFE';
@@ -43,6 +46,7 @@ const form = useForm({
   nombre: propsDef.lead?.nombre || '',
   apellido_paterno: propsDef.lead?.apellido_paterno || '',
   apellido_materno: propsDef.lead?.apellido_materno || '',
+  codigo_pais: propsDef.lead?.codigo_pais || '591',
   celular: propsDef.lead?.celular || '',
   genero: propsDef.lead?.genero || '',
   ciudad: propsDef.lead?.ciudad || '',
@@ -57,8 +61,10 @@ const form = useForm({
 
   interes_nivel: propsDef.lead?.interes_nivel || 'Bajo',
 
-  fecha_registro: propsDef.lead?.fecha_registro || '',
-  ultimo_contacto: propsDef.lead?.ultimo_contacto || '',
+  fecha_registro: dayjs(propsDef.lead?.fecha_registro).format('DD/MM/YYYY HH:mm') || '',
+  ultimo_contacto: dayjs(propsDef.lead?.ultimo_contacto).format('DD/MM/YYYY HH:mm') || '',
+
+  promocion_id: propsDef.lead?.promocion_id || null,
 
   observaciones: propsDef.lead?.observaciones || '',
 });
@@ -101,8 +107,17 @@ const submit = () => {
     <div class="grid grid-cols-3 gap-4">
       <div>
         <Label required>Celular</Label>
-        <Input v-model="form.celular" placeholder="########" :disabled="!canEdit" :class="{'border-red-500': form.errors.celular}" />
-        <p v-if="form.errors.celular" class="text-red-500 text-sm mt-1">{{ form.errors.celular }}</p>
+        <div class="flex gap-2">
+          <div class="w-1/3">
+            <Selectlist v-model="form.codigo_pais" :options="codigos_pais" :disabled="!canEdit" />
+          </div>
+
+          <div class="w-2/3">
+            <Input v-model="form.celular" placeholder="########" :disabled="!canEdit" :class="{'border-red-500': form.errors.celular}" />
+          </div>
+
+          <p v-if="form.errors.celular" class="text-red-500 text-sm mt-1">{{ form.errors.celular }}</p>
+        </div>
       </div>
 
       <div>
@@ -169,14 +184,19 @@ const submit = () => {
       </div>
 
       <div>
+        <Label>Promoción</Label>
+        <Selectlist v-model="form.promocion_id" :options="promociones" :key="'id'" :value="'nombre'" :disabled="!canEdit" />
+      </div>
+
+      <!--div>
         <Label>Fecha registro</Label>
-        <Datepicker v-model="form.fecha_registro" :disabled="true" />
+        <Input v-model="form.fecha_registro" placeholder="dd/mm/aaaa --:--" :disabled="true" />
       </div>
 
       <div>
         <Label>Último contacto</Label>
-        <Datepicker v-model="form.ultimo_contacto" :disabled="!canEdit" />
-      </div>
+        <Input v-model="form.ultimo_contacto" placeholder="dd/mm/aaaa --:--" :disabled="true" />
+      </div-->
     </div>
 
     <!-- OBSERVACIONES -->

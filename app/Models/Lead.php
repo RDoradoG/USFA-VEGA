@@ -17,6 +17,7 @@ class Lead extends Model
         'nombre',
         'apellido_paterno',
         'apellido_materno',
+        'codigo_pais',
         'celular',
         'genero',
         'ciudad',
@@ -26,6 +27,7 @@ class Lead extends Model
         'estado_id',
         'usuario_id',
         'fuente_id',
+        'promocion_id',
         'interes_nivel',
         'fecha_registro',
         'ultimo_contacto',
@@ -56,6 +58,11 @@ class Lead extends Model
     public function asesor()
     {
         return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    public function promocion()
+    {
+        return $this->belongsTo(Promocion::class, 'promocion_id');
     }
 
     public function estado()
@@ -96,6 +103,11 @@ class Lead extends Model
     public function recordatorios()
     {
         return $this->hasMany(Recordatorio::class);
+    }
+
+    public function historyLeads()
+    {
+        return $this->hasMany(HistoryLead::class);
     }
 
     // 🧠 Scopes útiles

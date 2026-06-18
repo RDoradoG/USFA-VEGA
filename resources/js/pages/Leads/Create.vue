@@ -7,7 +7,9 @@ defineProps([
   'horarios',
   'estados',
   'usuarios',
-  'fuentes'
+  'fuentes',
+  'codigos_pais',
+  'promociones'
 ]);
 </script>
 

@@ -68,6 +68,11 @@ class User extends Authenticatable
         return $this->hasMany(Recordatorio::class, 'usuario_id');
     }
 
+    public function historyLeads()
+    {
+        return $this->hasMany(HistoryLead::class);
+    }
+
     // 🧠 Helpers
     public function isJefe()
     {

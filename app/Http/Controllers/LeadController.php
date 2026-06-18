@@ -9,9 +9,13 @@ use App\Models\Horario;
 use App\Models\Estado;
 use App\Models\User;
 use App\Models\Fuente;
+use App\Models\Promocion;
+use App\Models\HistoryLead;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
+//use Carbon\Carbon;
+use libphonenumber\PhoneNumberUtil;
+use Illuminate\Validation\Rule;
 
 class LeadController extends Controller
 {
@@ -20,6 +24,7 @@ class LeadController extends Controller
         'nombre' => 'required|string|max:255',
         'apellido_paterno' => 'required|string|max:255',
         'apellido_materno' => 'required|string|max:255',
+        'codigo_pais' => '',
         'celular' => '',
         'genero' => 'nullable|string',
         'ciudad' => 'nullable|string',
@@ -31,6 +36,7 @@ class LeadController extends Controller
         'estado_id' => 'required|exists:estados,id',
         'usuario_id' => 'nullable|exists:usuarios,id',
         'fuente_id' => 'required|exists:fuentes,id',
+        'promocion_id' => 'nullable|exists:promociones,id',
 
         'interes_nivel' => 'required|in:Alto,Medio,Bajo',
         'observaciones' => 'nullable|string',
@@ -48,9 +54,31 @@ class LeadController extends Controller
         'interes_nivel.required' => 'El interes es obligatorio.'
     ];
 
-    private function getValidations($new = true)
+    private function getValidations(Request $request, $lead = null)
     {
-        $this->validation['celular'] = ($new) ? 'required|string|max:20|unique:leads,celular' : 'required|string|max:20';
+        if (is_null($lead)) {
+            $this->validation['celular'] = [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('leads')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('codigo_pais', $request->codigo_pais);
+                    })
+            ];
+        } else {
+            $this->validation['celular'] = [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('leads')
+                    ->ignore($lead->id)
+                    ->where(function ($query) use ($request) {
+                        return $query->where('codigo_pais', $request->codigo_pais);
+                    })
+            ];
+        }
+
         return $this->validation;
     }
 
@@ -164,18 +192,29 @@ class LeadController extends Controller
             'estados' => Estado::orderBy('orden')->get(),
             'usuarios' => User::all(),
             'fuentes' => Fuente::all(),
+            'codigos_pais' => $this->getListCodes(),
+            'promociones' => Promocion::all()
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->getValidations(true), $this->messages);
+        $validated = $request->validate($this->getValidations($request), $this->messages);
 
         if (auth()->user()->rol !== 'JEFE') $validated['usuario_id'] = auth()->user()->id;
 
-        if (empty($validated['fecha_registro'])) $validated['fecha_registro'] = Carbon::now()->toDateString();
+        if (empty($validated['codigo_pais'])) $validated['codigo_pais'] = '591';
 
-        Lead::create($validated);
+        $validated['fecha_registro'] = now();
+        $validated['ultimo_contacto'] = now();
+
+        $lead = Lead::create($validated);
+
+        HistoryLead::create([
+            'usuario_id' => auth()->user()->id,
+            'lead_id' => $lead->id,
+            'mensaje' => auth()->user()->nombre . ' creó el nuevo lead.'
+        ]);
 
         return redirect()->route('leads.index')->with('success', 'Lead creado');
     }
@@ -198,6 +237,9 @@ class LeadController extends Controller
             'estados' => Estado::orderBy('orden')->get(),
             'usuarios' => User::all(),
             'fuentes' => Fuente::all(),
+            'codigos_pais' => $this->getListCodes(),
+            'promociones' => Promocion::all(),
+            'history_lead' => HistoryLead::where('lead_id', $lead->id)->orderBy('created_at', 'asc')->get()
         ]);
     }
 
@@ -209,9 +251,27 @@ class LeadController extends Controller
             abort(403);
         }
 
-        $validated = $request->validate($this->getValidations(false), $this->messages);
+        $validated = $request->validate($this->getValidations($request, $lead), $this->messages);
 
+        $mensajes = [];
+
+        if ($lead->estado_id != $validated['estado_id']) $mensajes[] = 'el estado a ' . Estado::where('id', $validated['estado_id'])->firstOrFail()->nombre;
+        if ($lead->usuario_id != $validated['usuario_id']) $mensajes[] = 'el asesor a ' . User::where('id', $validated['usuario_id'])->firstOrFail()->nombre;
+        if ($lead->fuente_id != $validated['fuente_id']) $mensajes[] = 'la fuente a ' . Fuente::where('id', $validated['fuente_id'])->firstOrFail()->nombre;
+        if ($lead->interes_nivel != $validated['interes_nivel']) $mensajes[] = 'el nivel de interés a ' . $validated['interes_nivel'];
+        if ($lead->promocion_id != $validated['promocion_id']) $mensajes[] = 'la promoción a ' . Promocion::where('id', $validated['promocion_id'])->firstOrFail()->nombre;
+        if ($lead->sede_id != $validated['sede_id']) $mensajes[] = 'la sede a ' . Sede::where('id', $validated['sede_id'])->firstOrFail()->nombre;
+        if ($lead->carrera_id != $validated['carrera_id']) $mensajes[] = 'la carrera a ' . Carrera::where('id', $validated['carrera_id'])->firstOrFail()->nombre;
+        if ($lead->horario_id != $validated['horario_id']) $mensajes[] = 'el horario a ' . Horario::where('id', $validated['horario_id'])->firstOrFail()->nombre;
+        if ($lead->ciudad != $validated['ciudad']) $mensajes[] = 'la ciudad a ' . $validated['ciudad'];
+    
         $lead->update($validated);
+
+        HistoryLead::create([
+            'usuario_id' => auth()->user()->id,
+            'lead_id' => $lead->id,
+            'mensaje' => auth()->user()->nombre . ' modificó ' . implode(', ', $mensajes) . '.'
+        ]);
 
         return redirect()->route('leads.index')->with('success', 'Lead actualizado');
     }
@@ -225,5 +285,30 @@ class LeadController extends Controller
         $lead->delete();
 
         return redirect()->back()->with('success', 'Lead eliminado');
+    }
+
+    private function getListCodes()
+    {
+        $phoneUtil = PhoneNumberUtil::getInstance();
+
+        $regiones = $phoneUtil->getSupportedRegions();
+
+        $codigos = [];
+
+        foreach ($regiones as $region) {
+            $codigo = $phoneUtil->getCountryCodeForRegion($region);
+
+            $codigos[] = [
+                'value' => $region . ' (' . $codigo . ')',   // Ej: BO, AR, US
+                'id' => strval($codigo)    // Ej: 591, 54, 1
+            ];
+        }
+
+        // Opcional: eliminar duplicados (varios países comparten código, ej: +1)
+        $codigosUnicos = collect($codigos)
+            ->unique('id')
+            ->values();
+
+        return $codigosUnicos;
     }
 }

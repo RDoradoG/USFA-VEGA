@@ -46,6 +46,13 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('promociones', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre');
+            $table->string('descripcion')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
 
@@ -54,6 +61,7 @@ return new class extends Migration
             $table->string('apellido_materno');
             $table->string('celular')->index();
             $table->string('genero')->nullable();
+            $table->string('codigo_pais')->nullable();
             $table->string('ciudad')->nullable();
 
             $table->foreignId('sede_id')->constrained()->cascadeOnDelete();
@@ -64,6 +72,7 @@ return new class extends Migration
             $table->foreignId('usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
 
             $table->foreignId('fuente_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('promocion_id')->nullable()->constrained('promociones')->cascadeOnDelete();
 
             $table->enum('interes_nivel', ['Alto', 'Medio', 'Bajo']);
 
@@ -73,6 +82,8 @@ return new class extends Migration
             $table->text('observaciones')->nullable();
 
             $table->timestamps();
+
+            $table->unique(['celular', 'codigo_pais']);
         });
 
         Schema::create('seguimientos', function (Blueprint $table) {
@@ -92,6 +103,17 @@ return new class extends Migration
             $table->text('observacion')->nullable();
 
             $table->timestamp('fecha_contacto')->useCurrent();
+
+            $table->timestamps();
+        });
+
+        Schema::create('history_leads', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('lead_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('usuario_id')->constrained('usuarios')->cascadeOnDelete();
+
+            $table->string('mensaje');
 
             $table->timestamps();
         });
@@ -124,6 +146,8 @@ return new class extends Migration
         Schema::dropIfExists('horarios');
         Schema::dropIfExists('carreras');
         Schema::dropIfExists('sedes');
+        Schema::dropIfExists('promociones');
+        Schema::dropIfExists('history_leads');
 
     }
 };
