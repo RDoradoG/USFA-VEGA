@@ -20,7 +20,7 @@ class LeadController extends Controller
         'nombre' => 'required|string|max:255',
         'apellido_paterno' => 'required|string|max:255',
         'apellido_materno' => 'required|string|max:255',
-        'celular' => 'required|string|max:20|unique:leads,celular',
+        'celular' => '',
         'genero' => 'nullable|string',
         'ciudad' => 'nullable|string',
 
@@ -46,7 +46,13 @@ class LeadController extends Controller
         'estado_id.required' => 'El estado es obligatorio.',
         'fuente_id.required' => 'La fuente es obligatoria.',
         'interes_nivel.required' => 'El interes es obligatorio.'
-    ]; 
+    ];
+
+    private function getValidations($new = true)
+    {
+        $this->validation['celular'] = ($new) ? 'required|string|max:20|unique:leads,celular' : 'required|string|max:20';
+        return $this->validation;
+    }
 
     public function list(Request $request)
     {
@@ -163,7 +169,7 @@ class LeadController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->validation, $this->messages);
+        $validated = $request->validate($this->getValidations(true), $this->messages);
 
         if (auth()->user()->rol !== 'JEFE') $validated['usuario_id'] = auth()->user()->id;
 
@@ -203,7 +209,7 @@ class LeadController extends Controller
             abort(403);
         }
 
-        $validated = $request->validate($this->validation, $this->messages);
+        $validated = $request->validate($this->getValidations(false), $this->messages);
 
         $lead->update($validated);
 

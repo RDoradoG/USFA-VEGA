@@ -18,6 +18,7 @@ const propsDef = defineProps([
 
 const isJefe = user.rol === 'JEFE';
 const isOwner = propsDef.lead.usuario_id === user.id;
+const alreadyDone = propsDef.lead.estado_id == 6;
 
 // permisos
 const canEdit = isJefe || isOwner;
@@ -106,7 +107,7 @@ const canEdit = isJefe || isOwner;
         </div>
 
         <!-- SEGUIMIENTOS -->
-        <div class="bg-white p-4 rounded shadow">
+        <div class="bg-white p-4 rounded shadow" v-if="! alreadyDone">
 
           <Seguimientos :lead="lead" />
 

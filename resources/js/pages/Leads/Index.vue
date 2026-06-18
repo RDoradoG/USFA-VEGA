@@ -145,21 +145,24 @@ const interests = [
 const isJefe = user.rol === 'JEFE';
 
 // BADGES
-const badgeEstado = (estado) => {
-  const map = {
-    NUEVO: 'bg-blue-100 text-blue-700',
-    CONTACTADO: 'bg-yellow-100 text-yellow-700',
-    INTERESADO: 'bg-green-100 text-green-700',
-    NO_INTERESADO: 'bg-red-100 text-red-700',
-  };
-  return map[estado] || 'bg-gray-100 text-gray-700';
+const badgeEstado = (color) => {
+  const colorMap = {
+    red: 'bg-red-300 text-red-800',
+    green: 'bg-green-300 text-green-800',
+    emerald: 'bg-emerald-300 text-emerald-800',
+    cyan: 'bg-cyan-300 text-cyan-800',
+    yellow: 'bg-yellow-300 text-yellow-800',
+    orange: 'bg-orange-300 text-orange-800',
+    grey: 'bg-grey-300 text-grey-800',
+  }
+  return colorMap[color] || 'bg-gray-100 text-gray-700';
 };
 
 const badgeInteres = (nivel) => {
   const map = {
-    ALTO: 'bg-green-100 text-green-700',
-    MEDIO: 'bg-yellow-100 text-yellow-700',
-    BAJO: 'bg-red-100 text-red-700',
+    Alto: 'bg-green-300 text-green-800',
+    Medio: 'bg-yellow-300 text-yellow-800',
+    Bajo: 'bg-red-300 text-red-800',
   };
   return map[nivel];
 };
@@ -350,7 +353,8 @@ const clearSearch = () => {
             <td class="px-4 py-2">
               <span
                 class="px-2 py-1 rounded text-xs"
-                :class="badgeEstado(lead.estado?.nombre)"
+                :style="colors ? { backgroundColor: '#ffffff'} : null"
+                :class="badgeEstado(lead.estado?.color)"
               >
                 {{ lead.estado?.nombre }}
               </span>

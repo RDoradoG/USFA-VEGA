@@ -21,10 +21,11 @@ const propsDef = defineProps({
 
 const isJefe = user.rol === 'JEFE';
 const isOwner = propsDef.lead?.usuario_id === user.id || propsDef.lead === undefined;
+const alreadyDone = propsDef.lead?.estado_id == 6
 
 const canChangeState = user.rol === 'JEFE' || (isOwner && propsDef.lead !== undefined)
 
-const canEdit = isJefe || isOwner;
+const canEdit = (isJefe || isOwner) && ! alreadyDone;
 //const canCreate = isJefe;
 
 const genreOptions = [
@@ -79,19 +80,19 @@ const submit = () => {
     <!-- DATOS BASICOS -->
     <div class="grid grid-cols-3 gap-4">
       <div> 
-        <Label>Nombre</Label>
-        <Input v-model="form.nombre" placeholder="Nombre" :disabled="!canEdit" :class="{'border-red-500': form.errors.nombre}" />
+        <Label required>Nombre</Label>
+        <Input v-model="form.nombre" placeholder="Nombre" :disabled="!canEdit" :class="{'border-red-500': form.errors.nombre}"/>
         <p v-if="form.errors.nombre" class="text-red-500 text-sm mt-1">{{ form.errors.nombre }}</p>
       </div>
 
       <div>
-        <Label>Apellido Paterno</Label>
+        <Label required>Apellido Paterno</Label>
         <Input v-model="form.apellido_paterno" placeholder="Apellido Paterno" :disabled="!canEdit" :class="{'border-red-500': form.errors.apellido_paterno}" />
         <p v-if="form.errors.apellido_paterno" class="text-red-500 text-sm mt-1">{{ form.errors.apellido_paterno }}</p>
       </div>
 
       <div>
-        <Label>Apellido Materno</Label>
+        <Label required>Apellido Materno</Label>
         <Input v-model="form.apellido_materno" placeholder="Apellido Materno" :disabled="!canEdit" :class="{'border-red-500': form.errors.apellido_materno}" />
         <p v-if="form.errors.apellido_materno" class="text-red-500 text-sm mt-1">{{ form.errors.apellido_materno }}</p>
       </div>
@@ -99,7 +100,7 @@ const submit = () => {
 
     <div class="grid grid-cols-3 gap-4">
       <div>
-        <Label>Celular</Label>
+        <Label required>Celular</Label>
         <Input v-model="form.celular" placeholder="########" :disabled="!canEdit" :class="{'border-red-500': form.errors.celular}" />
         <p v-if="form.errors.celular" class="text-red-500 text-sm mt-1">{{ form.errors.celular }}</p>
       </div>
@@ -117,36 +118,44 @@ const submit = () => {
 
     <div class="grid grid-cols-3 gap-4">
       <div>
-        <Label>Sede</Label>
+        <Label required>Sede</Label>
         <Selectlist v-model="form.sede_id" :options="sedes" :key="'id'" :value="'nombre'" :disabled="!canEdit" :class="{'border-red-500': form.errors.sede_id}" />
         <p v-if="form.errors.sede_id" class="text-red-500 text-sm mt-1">{{ form.errors.sede_id }}</p>
       </div>
 
       <div>
-        <Label>Carrera</Label>
+        <Label required>Carrera</Label>
         <Selectlist v-model="form.carrera_id" :options="carreras" :key="'id'" :value="'nombre'" :disabled="!canEdit" />
       </div>
 
       <div>
-        <Label>Horario</Label>
+        <Label required>Horario</Label>
         <Selectlist v-model="form.horario_id" :options="horarios" :key="'id'" :value="'nombre'" :disabled="!canEdit" />
       </div>
     </div>
 
     <div class="grid grid-cols-3 gap-4">
       <div>
-        <Label>Estado</Label>
-        <Selectlist v-model="form.estado_id" :options="estados" :key="'id'" :value="'nombre'" :disabled="!canChangeState" :class="{'border-red-500': form.errors.estado_id}" />
+        <Label required>Estado</Label>
+        <Selectlist 
+          v-model="form.estado_id"
+          :colors="true"
+          :options="estados"
+          :key="'id'"
+          :value="'nombre'"
+          :disabled="!canChangeState || alreadyDone"
+          :class="{'border-red-500': form.errors.estado_id}" 
+        />
         <p v-if="form.errors.estado_id" class="text-red-500 text-sm mt-1">{{ form.errors.estado_id }}</p>
       </div>
 
       <div>
         <Label>Asesor</Label>
-        <Selectlist v-model="form.usuario_id" :options="usuarios" :key="'id'" :value="'nombre'" :disabled="!isJefe" />
+        <Selectlist v-model="form.usuario_id" :options="usuarios" :key="'id'" :value="'nombre'" :disabled="!isJefe || alreadyDone" />
       </div>
 
       <div>
-        <Label>Fuente</Label>
+        <Label required>Fuente</Label>
         <Selectlist v-model="form.fuente_id" :options="fuentes" :key="'id'" :value="'nombre'" :disabled="!canEdit" :class="{'border-red-500': form.errors.fuente_id}" />
         <p v-if="form.errors.fuente_id" class="text-red-500 text-sm mt-1">{{ form.errors.fuente_id }}</p>
       </div>
@@ -154,14 +163,14 @@ const submit = () => {
 
     <div class="grid grid-cols-3 gap-4">
       <div>
-        <Label>Nivel de interés</Label>
+        <Label required>Nivel de interés</Label>
         <Selectlist v-model="form.interes_nivel" :options="interests" :disabled="!canEdit" :class="{'border-red-500': form.errors.interes_nivel}" />
         <p v-if="form.errors.interes_nivel" class="text-red-500 text-sm mt-1">{{ form.errors.interes_nivel }}</p>
       </div>
 
       <div>
         <Label>Fecha registro</Label>
-        <Datepicker v-model="form.fecha_registro" :disabled="!isJefe" />
+        <Datepicker v-model="form.fecha_registro" :disabled="true" />
       </div>
 
       <div>

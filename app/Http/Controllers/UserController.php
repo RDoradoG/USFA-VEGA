@@ -28,6 +28,49 @@ class UserController extends BaseController
         ]);
     }
 
+    public function list(Request $request)
+    {
+  
+        // Parámetros con valores por defecto
+        $page = $request->get('page', 1);
+        $perPage = $request->get('per_page', 10);
+        $orderBy = $request->get('order_by', 'id');
+        $orderDirection = $request->get('order_direction', 'asc');
+
+        $filter = $request->get('filter', '');
+        $estado_query = $request->get('estado', null);
+        $rol = $request->get('rol', '');     
+
+        switch ($estado_query) {
+            case 'true': $estado = true; break;
+            case 'false': $estado = false; break;
+            default: $estado = null; break;
+        }
+
+
+        $query = User::query();
+
+        if (!empty($filter)) {
+            $filterStr = '%' . $filter . '%';
+
+            $query->where(function ($q) use ($filterStr) {
+                $q->where('nombre', 'like', $filterStr)
+                ->orWhere('email', 'like', $filterStr);
+            });
+        }
+
+        // 🎯 Filtros específicos
+        if ($estado !== null) $query->where('activo', $estado);
+
+        if (!empty($rol)) $query->where('rol', $rol);
+
+        $query->orderBy($orderBy, $orderDirection);
+
+        $users = $query->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json($users);
+    }
+
     public function create()
     {
         return Inertia::render('Users/Create');
@@ -88,7 +131,11 @@ class UserController extends BaseController
             return back()->withErrors('No puedes eliminarte');
         }
 
-        $user->delete();
+        $data = [
+            'activo' => false
+        ];
+
+        $user->update($data);
         return back();
     }
 }

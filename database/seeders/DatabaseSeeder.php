@@ -29,12 +29,13 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('estados')->insert([
-            ['nombre' => 'Nuevo', 'orden' => 1, 'created_at' => $current_date, 'updated_at' => $current_date],
-            ['nombre' => 'Sin contactar', 'orden' => 2, 'created_at' => $current_date, 'updated_at' => $current_date],
-            ['nombre' => 'Contactado', 'orden' => 3, 'created_at' => $current_date, 'updated_at' => $current_date],
-            ['nombre' => 'Interesado', 'orden' => 4, 'created_at' => $current_date, 'updated_at' => $current_date],
-            ['nombre' => 'Inscrito', 'orden' => 5, 'created_at' => $current_date, 'updated_at' => $current_date],
-            ['nombre' => 'Perdido', 'orden' => 6, 'created_at' => $current_date, 'updated_at' => $current_date]
+            ['nombre' => 'Nuevo', 'color' => 'gray', 'orden' => 1, 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Sin contactar', 'color' => 'orange', 'orden' => 2, 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Contactado', 'color' => 'yellow', 'orden' => 3, 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Interesado', 'color' => 'cyan', 'orden' => 4, 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'En Caja', 'color' => 'emerald', 'orden' => 5, 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Inscrito', 'color' => 'green', 'orden' => 6, 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Perdido', 'color' => 'red', 'orden' => 7, 'created_at' => $current_date, 'updated_at' => $current_date]
         ]);
 
         DB::table('horarios')->insert([

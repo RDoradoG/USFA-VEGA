@@ -41,8 +41,8 @@ return new class extends Migration
         Schema::create('estados', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+            $table->string('color')->default('gray');
             $table->integer('orden')->default(0);
-            $table->string('color')->nullable();
             $table->timestamps();
         });
 
@@ -65,7 +65,7 @@ return new class extends Migration
 
             $table->foreignId('fuente_id')->constrained()->cascadeOnDelete();
 
-            $table->enum('interes_nivel', ['ALTO', 'MEDIO', 'BAJO']);
+            $table->enum('interes_nivel', ['Alto', 'Medio', 'Bajo']);
 
             $table->timestamp('fecha_registro')->useCurrent();
             $table->timestamp('ultimo_contacto')->nullable();
