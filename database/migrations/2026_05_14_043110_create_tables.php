@@ -82,6 +82,7 @@ return new class extends Migration
             $table->timestamp('ultimo_contacto')->nullable();
 
             $table->text('observaciones')->nullable();
+            $table->text('monto_inscripcion')->nullable();
 
             $table->timestamps();
 
@@ -120,6 +121,18 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('pagos', function (Blueprint $table) {
+            $table->id();
+
+            $table->double('monto')->default(0);
+            $table->string('numero_factura');
+            $table->string('cuf_id');
+
+            $table->foreignId('lead_id')->constrained()->cascadeOnDelete();
+
+            $table->timestamps();
+        });
+
         Schema::create('recordatorios', function (Blueprint $table) {
             $table->id();
 
@@ -142,6 +155,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('recordatorios');
         Schema::dropIfExists('seguimientos');
+        Schema::dropIfExists('pagos');
         Schema::dropIfExists('history_leads');
         Schema::dropIfExists('leads');
         Schema::dropIfExists('estados');

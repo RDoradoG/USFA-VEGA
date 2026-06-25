@@ -7,6 +7,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use App\Http\Middleware\EnsureClientToken;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,6 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(prepend: [
             EnsureFrontendRequestsAreStateful::class,
+        ]);
+
+        $middleware->alias([
+            'client' => EnsureClientToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PromocionController;
-
+use App\Http\Controllers\PagoController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('leads', [LeadController::class, 'list']);
@@ -13,4 +13,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('promos/{id}/activate', [PromocionController::class, 'activate']);
     Route::put('promos/{id}/inactivate', [PromocionController::class, 'inactivate']);
+});
+
+Route::middleware('client')->group(function () {
+    Route::post('pagos/{id}', [PagoController::class, 'store']);
 });

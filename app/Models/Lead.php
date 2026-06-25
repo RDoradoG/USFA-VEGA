@@ -110,6 +110,11 @@ class Lead extends Model
         return $this->hasMany(HistoryLead::class);
     }
 
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class);
+    }
+
     // 🧠 Scopes útiles
     public function scopeSinContacto($query)
     {
