@@ -14,7 +14,7 @@ class UserController extends BaseController
     {
         // SOLO JEFE
         $this->middleware(function ($request, $next) {
-            if (auth()->user()->rol !== 'JEFE') {
+            if (auth()->user()->rol !== 'JEFE' && auth()->user()->rol !== 'SUPERADMIN') {
                 abort(403);
             }
             return $next($request);
@@ -48,7 +48,7 @@ class UserController extends BaseController
         }
 
 
-        $query = User::query();
+        $query = User::where('rol', '!=', 'SUPERADMIN');
 
         if (!empty($filter)) {
             $filterStr = '%' . $filter . '%';
@@ -129,6 +129,10 @@ class UserController extends BaseController
     {
         if ($user->id === auth()->id()) {
             return back()->withErrors('No puedes eliminarte');
+        }
+
+        if ($user->rol === 'SUPERADMIN') {
+            return back()->withErrors('No puedes eliminar al super admin');
         }
 
         $data = [

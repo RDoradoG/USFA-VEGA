@@ -175,7 +175,7 @@ class LeadController extends Controller
         
         return Inertia::render('Leads/Index', [
             'estados' => Estado::orderBy('orden')->get(),
-            'usuarios' => ($user->rol === 'ASESOR') ? [] : User::all(),
+            'usuarios' => ($user->rol === 'ASESOR') ? [] : User::where('rol', '!=', 'SUPERADMIN')->get(),
             'fuentes' => Fuente::all(),
             'auth' => [
                 'user' => $user
@@ -189,8 +189,8 @@ class LeadController extends Controller
             'sedes' => Sede::all(),
             'carreras' => Carrera::all(),
             'horarios' => Horario::all(),
-            'estados' => Estado::orderBy('orden')->get(),
-            'usuarios' => User::all(),
+            'estados' => Estado::where('id', '!=', 6)->orderBy('orden')->get(),
+            'usuarios' => User::where('activo', 1)->where('rol', '!=', 'SUPERADMIN')->get(),
             'fuentes' => Fuente::all(),
             'codigos_pais' => $this->getListCodes(),
             'promociones' => Promocion::all()
@@ -234,8 +234,8 @@ class LeadController extends Controller
             'sedes' => Sede::all(),
             'carreras' => Carrera::all(),
             'horarios' => Horario::all(),
-            'estados' => Estado::orderBy('orden')->get(),
-            'usuarios' => User::all(),
+            'estados' => Estado::where('id', '!=', 6)->orderBy('orden')->get(),
+            'usuarios' => User::where('activo', 1)->where('rol', '!=', 'SUPERADMIN')->get(),
             'fuentes' => Fuente::all(),
             'codigos_pais' => $this->getListCodes(),
             'promociones' => Promocion::all(),

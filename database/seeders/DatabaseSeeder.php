@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         DB::table('usuarios')->insert([
             'nombre' => 'Admin',
             'email' => 'admin@usfa.com',
-            'rol' => 'JEFE',
+            'rol' => 'SUPERADMIN',
             'password' => Hash::make('Admin123'),
             'created_at' => $current_date,
             'updated_at' => $current_date

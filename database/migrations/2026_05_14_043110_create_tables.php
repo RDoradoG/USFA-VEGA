@@ -50,6 +50,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('descripcion')->nullable();
+            $table->integer('beca');
+            $table->boolean('activo');
             $table->timestamps();
         });
 
@@ -140,6 +142,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('recordatorios');
         Schema::dropIfExists('seguimientos');
+        Schema::dropIfExists('history_leads');
         Schema::dropIfExists('leads');
         Schema::dropIfExists('estados');
         Schema::dropIfExists('fuentes');
@@ -147,7 +150,5 @@ return new class extends Migration
         Schema::dropIfExists('carreras');
         Schema::dropIfExists('sedes');
         Schema::dropIfExists('promociones');
-        Schema::dropIfExists('history_leads');
-
     }
 };

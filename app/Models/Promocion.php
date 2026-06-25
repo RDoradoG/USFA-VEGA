@@ -10,7 +10,9 @@ class Promocion extends Model
 
     protected $fillable = [
         'nombre',
-        'descripcion'
+        'descripcion',
+        'beca',
+        'activo'
     ];
 
     public function leads()

@@ -56,6 +56,22 @@ export async function postAPIs(
     return response.data
 }
 
+export async function putAPIs(
+    apiRoute: string,
+    data: any
+) {
+    const url = `/api/${apiRoute}`
+
+    const apiClient = axios.create({
+        withCredentials: true,
+        withXSRFToken: true
+    })
+
+    const response = await apiClient.put(url, data)
+
+    return response.data
+}
+
 export async function deleteAPIs(
     apiRoute: string,
     id: number
@@ -73,5 +89,5 @@ export async function deleteAPIs(
 }
 
 export function useAPIs() {
-    return { getAPIs, postAPIs, deleteAPIs };
+    return { getAPIs, postAPIs, putAPIs, deleteAPIs };
 }

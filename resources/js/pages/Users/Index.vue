@@ -43,7 +43,17 @@ const eliminar = () => {
   if (!userToDelete.value) return;
 
   router.delete(`/users/${userToDelete.value.id}`, {
-    onSuccess: closeModal
+    onSuccess: () => {
+      closeModal();
+      getRows(
+        search.value,
+        rol.value,
+        estado.value,
+        page.value,
+        orderBy.value,
+        orderDirection.value
+      );
+    }
   });
 };
 
