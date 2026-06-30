@@ -34,12 +34,15 @@ const submit = () => {
 
     <Label required>Nombre</Label>
     <Input v-model="form.nombre" placeholder="Nombre" class="w-full border px-3 py-2 rounded" />
+    <p v-if="form.errors.nombre" class="text-red-500 text-sm mt-1">{{ form.errors.nombre }}</p>
 
     <Label required>Descripción</Label>
     <Input v-model="form.descripcion" placeholder="Descripción" class="w-full border px-3 py-2 rounded" />
+    <p v-if="form.errors.descripcion" class="text-red-500 text-sm mt-1">{{ form.errors.descripcion }}</p>
 
     <Label required>Beca</Label>
     <Input v-model="form.beca" placeholder="Beca %" class="w-full border px-3 py-2 rounded" />
+    <p v-if="form.errors.beca" class="text-red-500 text-sm mt-1">{{ form.errors.beca }}</p>
 
     <button class="bg-blue-600 text-white px-4 py-2 rounded">
       Guardar

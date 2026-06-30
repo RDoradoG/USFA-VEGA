@@ -6,6 +6,7 @@ use App\Models\Promocion;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\ConfigLead;
 
 class PromocionController extends Controller
 {
@@ -65,7 +66,9 @@ class PromocionController extends Controller
 
     public function index()
     {   
-        return Inertia::render('Promos/Index', []);
+        return Inertia::render('Promos/Index', [
+            'config' => ConfigLead::where('id', 1)->firstOrFail()
+        ]);
     }
 
     public function create()
@@ -124,5 +127,18 @@ class PromocionController extends Controller
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function changeConfigurations(Request $request)
+    {
+        $validated = $request->validate([
+            'dias_inactivo' => 'required|integer',
+        ], [
+            'dias_inactivo.required' => 'Los días son obligatorios.'
+        ]);
+
+        ConfigLead::where('id', 1)->firstOrFail()->update($validated);
+
+        return redirect()->route('promos.index')->with('success', 'Configuración actualizada');
     }
 }

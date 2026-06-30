@@ -20,6 +20,8 @@ class PagoController extends Controller
         'numero_factura.required' => 'el número de factura es obligatorio.'
     ];
 
+    private const STATE_ID = 6;
+
     public function store(Request $request, Lead $lead)
     {
         $validated = $request->validate($this->validation, $this->messages);
@@ -29,11 +31,12 @@ class PagoController extends Controller
 
         $pago = Pago::create($validated);
 
-        if (!empty($request->monto_total)) {
-            $lead->update([
-                'monto_inscripcion' => $request->monto_total
-            ]);
-        }
+        $new_lead = [];
+
+        if (!empty($request->monto_total)) $new_lead['monto_inscripcion'] = $request->monto_total;
+        if ($lead->estado_id != self::STATE_ID) $new_lead['estado_id'] =  self::STATE_ID;
+
+        if (!empty($new_lead)) $lead->update($new_lead);
 
         return response()->json($pago);
     }

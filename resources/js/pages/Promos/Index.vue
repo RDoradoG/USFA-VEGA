@@ -1,5 +1,5 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import { ref, watch, onMounted  } from 'vue';
 import Modal from '@/components/Modal.vue';
 import { PencilRuler, ShieldCheck, ShieldX } from 'lucide-vue-next';
@@ -12,7 +12,8 @@ import { Pagination } from '@/components/ui/pagination'
 import { promiseHooks } from 'v8';
 
 const propsDef = defineProps({
-  filtros: Object
+  filtros: Object,
+  config: Object
 });
 
 const { getAPIs, putAPIs } = useAPIs();
@@ -27,6 +28,8 @@ const page = ref(1);
 const orderBy = ref('id');
 const orderDirection = ref('asc');
 const promos = ref([]);
+
+const form = useForm({dias_inactivo: propsDef.config?.dias_inactivo || 5})
 
 const openModal = (promo, active) => {
   promoToChange.value = promo;
@@ -90,10 +93,33 @@ const changePage = (page_selected) => {
   )
 }
 
+const submitConfig = () => {
+  form.put(`/config_leads`);
+}
+
 </script>
 
 <template>
   <div class="p-6 space-y-6">
+
+    <div class="flex flex-col items-start space-y-6">
+      <h1 class="text-xl font-bold">Configuraciones</h1>
+
+      <form @submit.prevent="submitConfig" class="w-full max-w-md space-y-4">
+        <div class="flex flex-col space-y-2">
+          <Label required> Días inactivos </Label>
+          <div class="flex items-center space-x-3">
+            <div class="flex-1">
+              <Input v-model="form.dias_inactivo" placeholder="Días inactivos para colocar como no contactados." class="border px-3 py-2 rounded" />
+              <p v-if="form.errors.dias_inactivo" class="text-red-500 text-sm mt-1">{{ form.errors.dias_inactivo }}</p>
+            </div>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded">
+              Guardar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
 
     <div class="flex justify-between">
       <h1 class="text-xl font-bold">Promociones</h1>

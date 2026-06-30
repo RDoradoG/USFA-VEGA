@@ -66,5 +66,9 @@ class DatabaseSeeder extends Seeder
             ['nombre' => 'Referido', 'created_at' => $current_date, 'updated_at' => $current_date]
         ]);
 
+        DB::table('config_lead')->insert([
+            ['dias_inactivo' => 5, 'created_at' => $current_date, 'updated_at' => $current_date]
+        ]);
+
     }
 }

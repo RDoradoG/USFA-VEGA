@@ -34,9 +34,11 @@ const submit = () => {
 
     <Label required>Nombre</Label>
     <Input v-model="form.nombre" placeholder="Nombre" class="w-full border px-3 py-2 rounded" />
+    <p v-if="form.errors.nombre" class="text-red-500 text-sm mt-1">{{ form.errors.nombre }}</p>
 
     <Label required>E-mail</Label>
     <Input v-model="form.email" placeholder="Email" class="w-full border px-3 py-2 rounded" />
+    <p v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</p>
 
     <Label required>Password</Label>
     <Input
@@ -45,6 +47,7 @@ const submit = () => {
       placeholder="Password"
       class="w-full border px-3 py-2 rounded"
     />
+    <p v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</p>
 
     <Label required>Rol</Label>
     <Selectlist v-model="form.rol" :options="roleOptions" />

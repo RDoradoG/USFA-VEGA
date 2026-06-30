@@ -8,4 +8,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::put('promos/{id}/activate', [PromocionController::class, 'activate']);
     Route::put('promos/{id}/inactivate', [PromocionController::class, 'inactivate']);
+
+    Route::put('config_leads', [PromocionController::class, 'changeConfigurations']);
 });

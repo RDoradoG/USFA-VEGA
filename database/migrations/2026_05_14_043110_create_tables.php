@@ -133,6 +133,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('config_lead', function (Blueprint $table) {
+            $table->id();
+            $table->integer('dias_inactivo')->default(5);
+            $table->timestamps();
+        });
+
         Schema::create('recordatorios', function (Blueprint $table) {
             $table->id();
 
