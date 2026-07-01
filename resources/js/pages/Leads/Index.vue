@@ -1,5 +1,5 @@
 <script setup>
-import { router, usePage, Link } from '@inertiajs/vue3';
+import { router, usePage, Link, useForm } from '@inertiajs/vue3';
 import { ref, watch, onMounted  } from 'vue';
 import Modal from '@/components/Modal.vue';
 
@@ -18,6 +18,7 @@ const { getAPIs } = useAPIs();
 const { props } = usePage();
 const user = props.auth.user;
 const showModal = ref(false);
+const showModalCSV = ref(false);
 const leadToDelete = ref(null);
 
 const openModal = (lead) => {
@@ -29,6 +30,9 @@ const closeModal = () => {
   showModal.value = false;
   leadToDelete.value = null;
 };
+
+const closeModalCSV = () => showModalCSV.value = false;
+const openModalCSV = () => showModalCSV.value = true;
 
 const propsDef = defineProps({
   //leads: Object,
@@ -52,7 +56,9 @@ const page = ref(1);
 const orderBy = ref('id');
 const orderDirection = ref('asc');
 
-
+const form = useForm({
+  file: null
+});
 // WATCH (auto búsqueda)
 watch([search, estado, usuario, interes, fuente, fechaDesde, fechaHasta], () => getRows(
     search.value,
@@ -142,7 +148,7 @@ const interests = [
 ]
 
 // PERMISOS
-const isJefe = user.rol === 'JEFE';
+const isJefe = user.rol === 'JEFE' || user.rol === 'SUPERADMIN';
 
 // BADGES
 const badgeEstado = (color) => {
@@ -172,7 +178,21 @@ const eliminar = (id) => {
   if (!leadToDelete.value) return;
 
   router.delete(`/leads/${leadToDelete.value.id}`, {
-    onSuccess: closeModal
+    onSuccess: () => {
+      closeModal()
+      getRows(
+        search.value,
+        estado.value,
+        usuario.value,
+        interes.value,
+        fuente.value,
+        fechaDesde.value,
+        fechaHasta.value,
+        page.value,
+        orderBy.value,
+        orderDirection.value
+      )
+    }
   });
 };
 
@@ -185,6 +205,57 @@ const clearSearch = () => {
   fechaDesde.value = '';
   fechaHasta.value = '';
 }
+
+const handleFileUpload = (e) => {
+  const selected = e.target.files[0];
+
+  if (!selected) return;
+
+  if (!selected.name.endsWith('.csv')) {
+    alert('Solo se permiten archivos CSV');
+    return;
+  }
+
+  form.file = selected;
+};
+
+const runCSV = () => {
+  if (!form.file) {
+    alert('Selecciona un archivo');
+    return;
+  }
+
+  form.post('/leads/upload-csv', {
+    forceFormData: true,
+
+    onStart: () => {
+      console.log('Subiendo...');
+    },
+    onProgress: (progress) => {
+      console.log(progress.percentage + '%');
+    },
+    onSuccess: () => {
+      form.reset('file');
+      closeModalCSV()
+      getRows(
+        search.value,
+        estado.value,
+        usuario.value,
+        interes.value,
+        fuente.value,
+        fechaDesde.value,
+        fechaHasta.value,
+        page.value,
+        orderBy.value,
+        orderDirection.value
+      )
+
+    },
+    onError: (errors) => {
+      console.error(errors);
+    }
+  });
+};
 
 /*const sortIcon = (column) => {
   if (orderBy.value !== column) return '↕';
@@ -200,12 +271,22 @@ const clearSearch = () => {
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold">Leads</h1>
 
-      <Link
-        href="/leads/create"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        + Nuevo Lead
-      </Link>
+      <div>
+        <button
+          v-if="isJefe"
+          @click="openModalCSV"
+          class="bg-green-600 text-white mr-4 px-4 py-1 rounded hover:bg-green-700"
+        >
+          Subir CSV
+        </button>
+
+        <Link
+          href="/leads/create"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          + Nuevo Lead
+        </Link>
+      </div>
     </div>
 
     <!-- FILTROS -->
@@ -240,6 +321,7 @@ const clearSearch = () => {
 
       <div class="grid grid-cols-5 gap-4">
         <div></div>
+
         <div>
           <Label>Desde</Label>
           <Input type="date" v-model="fechaDesde" />
@@ -460,6 +542,44 @@ const clearSearch = () => {
           class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Eliminar
+        </button>
+      </div>
+    </Modal>
+
+    <Modal :show="showModalCSV" @close="closeModalCSV">
+      <h2 class="text-lg font-bold mb-2">
+        Subir archivo
+      </h2>
+
+      <Label>Importar desde CSV</Label>
+      <input
+        type="file"
+        accept=".csv"
+        @change="handleFileUpload"
+        class="border rounded px-2 py-1 mt-1"
+      />
+
+      <div v-if="form.errors.file" class="text-red-500 text-sm mt-1">
+        {{ form.errors.file }}
+      </div>
+
+      <div v-if="form.progress" class="text-sm text-gray-500 mt-1">
+        {{ form.progress.percentage }}%
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          @click="closeModalCSV"
+          class="px-4 py-2 border rounded"
+        >
+          Cancelar
+        </button>
+
+        <button
+          @click="runCSV"
+          class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Ejecutar
         </button>
       </div>
     </Modal>

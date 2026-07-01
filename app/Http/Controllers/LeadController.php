@@ -13,9 +13,10 @@ use App\Models\Promocion;
 use App\Models\HistoryLead;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-//use Carbon\Carbon;
 use libphonenumber\PhoneNumberUtil;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class LeadController extends Controller
 {
@@ -278,7 +279,7 @@ class LeadController extends Controller
 
     public function destroy(Lead $lead)
     {
-        if (auth()->user()->rol !== 'JEFE') {
+        if (auth()->user()->rol !== 'JEFE' && auth()->user()->rol !== 'SUPERADMIN') {
             abort(403);
         }
 
@@ -310,5 +311,64 @@ class LeadController extends Controller
             ->values();
 
         return $codigosUnicos;
+    }
+
+    public function uploadCSV(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:csv,txt|max:2048'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Archivo inválido',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $file = $request->file('file');
+
+        $path = $file->getRealPath();
+
+        $data = array_map('str_getcsv', file($path));
+
+        // OPCIONAL: quitar encabezado
+        $header = array_shift($data);
+
+        foreach ($data as $row) {
+
+            $sede = (empty($row[7])) ? null : Sede::where('nombre', $row[7])->first();
+            $carrera = (empty($row[8])) ? null : Carrera::where('nombre', $row[8])->first();
+            $horario = (empty($row[9])) ? null : Horario::where('nombre', $row[9])->first();
+            $estado = (empty($row[10])) ? null : Estado::where('nombre', $row[10])->first();
+            $fuente = (empty($row[11])) ? null : Fuente::where('nombre', $row[11])->first();
+            $promocion = (empty($row[12])) ? null : Promocion::where('nombre', $row[12])->first();
+
+            // Ajusta según tus columnas CSV
+            Lead::create([
+                'nombre' => $row[0] ?? null,
+                'apellido_paterno' => $row[1] ?? null,
+                'apellido_materno' => $row[2] ?? null,
+                'codigo_pais' => $row[3] ?? '591',
+                'celular' => $row[4] ?? null,
+                'genero' => $row[5] ?? null,
+                'ciudad' => $row[6] ?? null,
+
+                'sede_id' => $sede->id ?? null,
+                'carrera_id' => $carrera->id ?? null,
+                'horario_id' => $horario->id ?? null,
+                'estado_id' => $estado->id ?? null,
+                'fuente_id' => $fuente->id ?? null,
+                'promocion_id' => $promocion->id ?? null,
+
+                'interes_nivel' => $row[13] ?? null,
+                'fecha_registro' => Carbon::parse($row[14])->format('Y-m-d H:i:s') ?? now(),
+                'ultimo_contacto' => Carbon::parse($row[15])->format('Y-m-d H:i:s') ?? now(),
+                'observaciones' => $row[16] ?? null,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Leads creados');
     }
 }

@@ -8,4 +8,5 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('leads', LeadController::class);
     Route::post('/leads/{lead}/seguimientos', [SeguimientoController::class, 'store']);
     Route::delete('/seguimientos/{seguimiento}', [SeguimientoController::class, 'destroy']);
+    Route::post('/leads/upload-csv', [LeadController::class, 'uploadCSV']);
 });
