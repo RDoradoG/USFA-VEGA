@@ -54,7 +54,15 @@ class DatabaseSeeder extends Seeder
             ['nombre' => 'Administración de empresas', 'created_at' => $current_date, 'updated_at' => $current_date],
             ['nombre' => 'Ingeniería de sistemas', 'created_at' => $current_date, 'updated_at' => $current_date],
             ['nombre' => 'Derecho', 'created_at' => $current_date, 'updated_at' => $current_date],
-            ['nombre' => 'Psicología', 'created_at' => $current_date, 'updated_at' => $current_date]
+            ['nombre' => 'Psicología', 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Comunicación Estratégica, Multimedia y Digital', 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Ciencias y Artes Audiovisuales', 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Ingeniería Comercial', 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Ingeniería Financiera', 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Administración y Gestión de Hotelería y Turismo', 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Contaduría pública', 'created_at' => $current_date, 'updated_at' => $current_date],
+            ['nombre' => 'Negocios internacionales', 'created_at' => $current_date, 'updated_at' => $current_date]
+            
         ]);
 
         DB::table('fuentes')->insert([

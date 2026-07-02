@@ -170,5 +170,6 @@ return new class extends Migration
         Schema::dropIfExists('carreras');
         Schema::dropIfExists('sedes');
         Schema::dropIfExists('promociones');
+        Schema::dropIfExists('config_lead');
     }
 };
