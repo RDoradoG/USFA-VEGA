@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Seguimiento;
 use App\Models\Lead;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SeguimientoController extends Controller
 {
     public function store(Request $request, Lead $lead)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Solo jefe o dueño del lead
         if ($user->rol === 'ASESOR' && $lead->usuario_id !== $user->id) {
@@ -39,7 +40,7 @@ class SeguimientoController extends Controller
 
     public function destroy(Seguimiento $seguimiento)
     {
-        if (auth()->user()->rol !== 'JEFE') {
+        if (Auth::user()->rol !== 'JEFE') {
             abort(403);
         }
 

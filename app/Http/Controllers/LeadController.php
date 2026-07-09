@@ -17,14 +17,17 @@ use libphonenumber\PhoneNumberUtil;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+
 
 class LeadController extends Controller
 {
 
     private $validation = [
         'nombre' => 'required|string|max:255',
-        'apellido_paterno' => 'required|string|max:255',
-        'apellido_materno' => 'required|string|max:255',
+        'apellido_paterno' => 'nullable|string|max:255|required_without:apellido_materno',
+        'apellido_materno' => 'nullable|string|max:255|required_without:apellido_paterno',
         'codigo_pais' => '',
         'celular' => '',
         'genero' => 'nullable|string',
@@ -45,8 +48,8 @@ class LeadController extends Controller
 
     private $messages = [
         'nombre.required' => 'El nombre es obligatorio.',
-        'apellido_paterno.required' => 'El apellido paterno es obligatorio.',
-        'apellido_materno.required' => 'El apellido materno es obligatorio.',
+        'apellido_paterno.required_without' => 'Debes ingresar al menos un apellido.',
+        'apellido_materno.required_without' => 'Debes ingresar al menos un apellido.',
         'celular.required' => 'El celular es obligatorio.',
         'celular.unique' => 'Ya existe un lead con este número de celular.',
         'sede_id.required' => 'La sede es obligatoria.',
@@ -54,6 +57,8 @@ class LeadController extends Controller
         'fuente_id.required' => 'La fuente es obligatoria.',
         'interes_nivel.required' => 'El interes es obligatorio.'
     ];
+
+    private const STATE_ID = 5;
 
     private function getValidations(Request $request, $lead = null)
     {
@@ -101,7 +106,7 @@ class LeadController extends Controller
         $fecha_desde = $request->get('fecha_desde', '');
         $fecha_hasta = $request->get('fecha_hasta', '');
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         $query = Lead::with([
             'sede',
@@ -172,7 +177,7 @@ class LeadController extends Controller
 
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         return Inertia::render('Leads/Index', [
             'estados' => Estado::orderBy('orden')->get(),
@@ -202,7 +207,7 @@ class LeadController extends Controller
     {
         $validated = $request->validate($this->getValidations($request), $this->messages);
 
-        if (auth()->user()->rol !== 'JEFE') $validated['usuario_id'] = auth()->user()->id;
+        if (Auth::user()->rol !== 'JEFE') $validated['usuario_id'] = Auth::user()->id;
 
         if (empty($validated['codigo_pais'])) $validated['codigo_pais'] = '591';
 
@@ -212,9 +217,9 @@ class LeadController extends Controller
         $lead = Lead::create($validated);
 
         HistoryLead::create([
-            'usuario_id' => auth()->user()->id,
+            'usuario_id' => Auth::user()->id,
             'lead_id' => $lead->id,
-            'mensaje' => auth()->user()->nombre . ' creó el nuevo lead.'
+            'mensaje' => Auth::user()->nombre . ' creó el nuevo lead.'
         ]);
 
         return redirect()->route('leads.index')->with('success', 'Lead creado');
@@ -246,7 +251,7 @@ class LeadController extends Controller
 
     public function update(Request $request, Lead $lead)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($user->rol === 'ASESOR' && $lead->usuario_id !== $user->id) {
             abort(403);
@@ -269,17 +274,34 @@ class LeadController extends Controller
         $lead->update($validated);
 
         HistoryLead::create([
-            'usuario_id' => auth()->user()->id,
+            'usuario_id' => Auth::user()->id,
             'lead_id' => $lead->id,
-            'mensaje' => auth()->user()->nombre . ' modificó ' . implode(', ', $mensajes) . '.'
+            'mensaje' => Auth::user()->nombre . ' modificó ' . implode(', ', $mensajes) . '.'
         ]);
+
+        //API
+        /*if ($lead->estado_id == self::STATE_ID) {
+            $this->sendToPay($last_names, $names, $sex, $id_sede, $id_carrera);
+        }*/
 
         return redirect()->route('leads.index')->with('success', 'Lead actualizado');
     }
 
+    /*private function sendToPay($last_names, $names, $sex, $id_sede, $id_carrera) {
+        $response = Http::post('https://ecovir.usfa.edu.bo:49233/api/adhesion/new', [
+            'Apellidos' => $last_names,
+            'Nombres' => $names,
+            'Sexo' => $sex,
+            'IdSede' => $id_sede,
+            'IdCarrera' => $id_carrera
+        ]);
+
+        return $response->json();
+    }*/
+
     public function destroy(Lead $lead)
     {
-        if (auth()->user()->rol !== 'JEFE' && auth()->user()->rol !== 'SUPERADMIN') {
+        if (Auth::user()->rol !== 'JEFE' && Auth::user()->rol !== 'SUPERADMIN') {
             abort(403);
         }
 
@@ -329,44 +351,46 @@ class LeadController extends Controller
 
         $file = $request->file('file');
 
-        $path = $file->getRealPath();
+        if (($handle = fopen($file->getRealPath(), 'r')) !== false) {
 
-        $data = array_map('str_getcsv', file($path));
+            $header = fgetcsv($handle);
 
-        // OPCIONAL: quitar encabezado
-        $header = array_shift($data);
+            while (($row = fgetcsv($handle)) !== false) {
+                $sede = (empty($row[7])) ? null : Sede::where('nombre', $row[7])->first();
+                $carrera = (empty($row[8])) ? null : Carrera::where('nombre', $row[8])->first();
+                $horario = (empty($row[9])) ? null : Horario::where('nombre', $row[9])->first();
+                $estado = (empty($row[10])) ? null : Estado::where('nombre', $row[10])->first();
+                $fuente = (empty($row[11])) ? null : Fuente::where('nombre', $row[11])->first();
+                $promocion = (empty($row[12])) ? null : Promocion::where('nombre', $row[12])->first();
 
-        foreach ($data as $row) {
+                $fecha_registro = (empty($row[14])) ? now() : Carbon::parse($row[14])->format('Y-m-d H:i:s');
+                $ultimo_contacto = (empty($row[15])) ? now() : Carbon::parse($row[15])->format('Y-m-d H:i:s');
 
-            $sede = (empty($row[7])) ? null : Sede::where('nombre', $row[7])->first();
-            $carrera = (empty($row[8])) ? null : Carrera::where('nombre', $row[8])->first();
-            $horario = (empty($row[9])) ? null : Horario::where('nombre', $row[9])->first();
-            $estado = (empty($row[10])) ? null : Estado::where('nombre', $row[10])->first();
-            $fuente = (empty($row[11])) ? null : Fuente::where('nombre', $row[11])->first();
-            $promocion = (empty($row[12])) ? null : Promocion::where('nombre', $row[12])->first();
+                // Ajusta según tus columnas CSV
+                Lead::create([
+                    'nombre' => $row[0] ?? null,
+                    'apellido_paterno' => $row[1] ?? null,
+                    'apellido_materno' => $row[2] ?? null,
+                    'codigo_pais' => $row[3] ?? '591',
+                    'celular' => $row[4] ?? null,
+                    'genero' => $row[5] ?? null,
+                    'ciudad' => $row[6] ?? null,
 
-            // Ajusta según tus columnas CSV
-            Lead::create([
-                'nombre' => $row[0] ?? null,
-                'apellido_paterno' => $row[1] ?? null,
-                'apellido_materno' => $row[2] ?? null,
-                'codigo_pais' => $row[3] ?? '591',
-                'celular' => $row[4] ?? null,
-                'genero' => $row[5] ?? null,
-                'ciudad' => $row[6] ?? null,
+                    'sede_id' => $sede->id ?? null,
+                    'carrera_id' => $carrera->id ?? null,
+                    'horario_id' => $horario->id ?? null,
+                    'estado_id' => $estado->id ?? null,
+                    'fuente_id' => $fuente->id ?? null,
+                    'promocion_id' => $promocion->id ?? null,
 
-                'sede_id' => $sede->id ?? null,
-                'carrera_id' => $carrera->id ?? null,
-                'horario_id' => $horario->id ?? null,
-                'estado_id' => $estado->id ?? null,
-                'fuente_id' => $fuente->id ?? null,
-                'promocion_id' => $promocion->id ?? null,
+                    'interes_nivel' => $row[13] ?? null,
+                    'fecha_registro' => $fecha_registro,
+                    'ultimo_contacto' => $ultimo_contacto,
+                    'observaciones' => $row[16] ?? null,
+                ]);
+            }
 
-                'interes_nivel' => $row[13] ?? null,
-                'fecha_registro' => Carbon::parse($row[14])->format('Y-m-d H:i:s') ?? now(),
-                'ultimo_contacto' => Carbon::parse($row[15])->format('Y-m-d H:i:s') ?? now(),
-                'observaciones' => $row[16] ?? null,
-            ]);
+            fclose($handle);
         }
 
         return redirect()->back()->with('success', 'Leads creados');

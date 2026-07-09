@@ -92,13 +92,13 @@ const submit = () => {
       </div>
 
       <div>
-        <Label required>Apellido Paterno</Label>
+        <Label>Apellido Paterno</Label>
         <Input v-model="form.apellido_paterno" placeholder="Apellido Paterno" :disabled="!canEdit" :class="{'border-red-500': form.errors.apellido_paterno}" />
         <p v-if="form.errors.apellido_paterno" class="text-red-500 text-sm mt-1">{{ form.errors.apellido_paterno }}</p>
       </div>
 
       <div>
-        <Label required>Apellido Materno</Label>
+        <Label>Apellido Materno</Label>
         <Input v-model="form.apellido_materno" placeholder="Apellido Materno" :disabled="!canEdit" :class="{'border-red-500': form.errors.apellido_materno}" />
         <p v-if="form.errors.apellido_materno" class="text-red-500 text-sm mt-1">{{ form.errors.apellido_materno }}</p>
       </div>

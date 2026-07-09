@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Routing\Controller as BaseController;
 
@@ -14,7 +15,7 @@ class UserController extends BaseController
     {
         // SOLO JEFE
         $this->middleware(function ($request, $next) {
-            if (auth()->user()->rol !== 'JEFE' && auth()->user()->rol !== 'SUPERADMIN') {
+            if (Auth::user()->rol !== 'JEFE' && Auth::user()->rol !== 'SUPERADMIN') {
                 abort(403);
             }
             return $next($request);
@@ -127,7 +128,7 @@ class UserController extends BaseController
 
     public function destroy(User $user)
     {
-        if ($user->id === auth()->id()) {
+        if ($user->id === Auth::user()->id()) {
             return back()->withErrors('No puedes eliminarte');
         }
 

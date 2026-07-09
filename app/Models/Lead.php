@@ -31,7 +31,8 @@ class Lead extends Model
         'interes_nivel',
         'fecha_registro',
         'ultimo_contacto',
-        'observaciones'
+        'observaciones',
+        'id_reserva'
     ];
 
     protected $casts = [

@@ -10,9 +10,11 @@ use App\Models\Pago;
 class PagoController extends Controller
 {
     private $validation = [
+        'idReserva' => 'required|numeric',
         'monto' => 'required|numeric',
         'numero_factura' => 'required|string',
-        'cuf_id' => 'string'
+        'cuf_id' => 'string',
+        'monto_total' => 'nullable|numeric'
     ];
 
     private $messages = [
@@ -22,10 +24,10 @@ class PagoController extends Controller
 
     private const STATE_ID = 6;
 
-    public function store(Request $request, Lead $lead)
+    public function store(Request $request)
     {
         $validated = $request->validate($this->validation, $this->messages);
-        //$lead = Lead::where('id', $id)->firstOrFail();
+        $lead = Lead::where('id_reserva', $validated->idReserva)->firstOrFail();
 
         $validated['lead_id'] = $lead->id;
 

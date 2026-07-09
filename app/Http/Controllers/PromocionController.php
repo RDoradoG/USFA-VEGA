@@ -7,6 +7,7 @@ use App\Models\Promocion;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\ConfigLead;
+use Illuminate\Support\Facades\Auth;
 
 class PromocionController extends Controller
 {
@@ -42,7 +43,7 @@ class PromocionController extends Controller
             default: $estado = null; break;
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         $query = Promocion::query();
 
@@ -95,7 +96,7 @@ class PromocionController extends Controller
 
     public function update(Request $request, Promocion $promo)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         //abort(403);
 

@@ -59,4 +59,12 @@ class ProfileController extends Controller
 
         return redirect('/');
     }
+
+    public function redirectHome() {
+        if (Auth::check()) {
+            return redirect('/leads');
+        } else {
+            return redirect('/login');
+        }
+    }
 }

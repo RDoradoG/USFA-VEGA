@@ -24,7 +24,7 @@ const isOwner = propsDef.lead.usuario_id === user.id;
 const alreadyDone = propsDef.lead.estado_id == 6;
 
 // permisos
-const canEdit = isJefe || isOwner;
+const canEdit = (isJefe || isOwner) && ! alreadyDone;
 
 </script>
 

@@ -1,5 +1,6 @@
 <script setup>
 import { useForm, usePage } from '@inertiajs/vue3';
+import { ref, onMounted, watch } from 'vue';
 import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
 import Input from '@/components/ui/input/Input.vue';
 
@@ -9,6 +10,7 @@ const props = defineProps({
 
 const { props: page } = usePage();
 const user = page.auth.user;
+const seguimientos = ref([]);
 
 const form = useForm({
   tipo: '',
@@ -24,17 +26,37 @@ const types = [
 ]
 
 const results = [
-  {id: 'NO RESPONDE', value: 'NO RESPONDE'},
+  {id: 'NO_RESPONDE', value: 'NO RESPONDE'},
   {id: 'INTERESADO', value: 'INTERESADO'},
-  {id: 'NO INTERESADO', value: 'NO INTERESADO'},
+  {id: 'NO_INTERESADO', value: 'NO INTERESADO'},
   {id: 'SEGUIMIENTO', value: 'SEGUIMIENTO'}
 ]
 
+const searchResult = (id) => {
+  const type = results.find(res => res.id == id)
+  return type === undefined ? '' : type.value
+}
+
 const submit = () => {
   form.post(`/leads/${props.lead.id}/seguimientos`, {
-    preserveScroll: true
+    preserveScroll: true,
+    onSuccess: () => {
+      form.reset();
+    }
   });
 };
+
+const refreshLead = (newLead) => {
+  seguimientos.value = [];
+
+  newLead.seguimientos.forEach(seg => {
+    seg.resultado = searchResult(seg.resultado);
+    seguimientos.value.push(seg);
+  });
+}
+
+onMounted(() => refreshLead(props.lead));
+watch(() => props.lead, (newLead) => refreshLead(newLead));
 </script>
 
 <template>
@@ -73,7 +95,7 @@ const submit = () => {
     <div class="space-y-3">
 
       <div
-        v-for="seg in lead.seguimientos"
+        v-for="seg in seguimientos"
         :key="seg.id"
         class="border p-3 rounded bg-gray-50"
       >
