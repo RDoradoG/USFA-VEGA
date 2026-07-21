@@ -100,7 +100,7 @@ return [
         ],
 
         //Dev
-        'sqlsrv' => [
+        'sqlsrv_dev' => [
             'driver' => 'sqlsrv',
             //'url' => env('DB_URL'),
             'host' => env('DB_HOST', 'localhost'),
@@ -115,7 +115,7 @@ return [
         ],
 
         //Prod
-        /*'sqlsrv' => [
+        'sqlsrv_prod' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', 'localhost'),
@@ -123,10 +123,13 @@ return [
             'database' => env('DB_DATABASE', 'laravel'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
+            'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-        ],*/
+            'options' => [
+                PDO::SQLSRV_ATTR_ENCODING => PDO::SQLSRV_ENCODING_UTF8
+            ]
+        ],
 
     ],
 
