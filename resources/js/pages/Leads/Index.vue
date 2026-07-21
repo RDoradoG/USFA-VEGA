@@ -8,18 +8,21 @@ import Label from '@/components/ui/label/Label.vue';
 import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
 import { useAPIs } from '@/composables/useAPI';
 import { Pagination } from '@/components/ui/pagination'
-//import axios from '@/lib/axios'
+import axios from '@/lib/axios'
 
 import { PencilRuler, Trash2, ArrowUp, ArrowDown } from 'lucide-vue-next';
 
-
 const { getAPIs } = useAPIs();
-
 const { props } = usePage();
+
 const user = props.auth.user;
 const showModal = ref(false);
+const showModalCSVResult = ref(false);
 const showModalCSV = ref(false);
 const leadToDelete = ref(null);
+
+const created = ref(0)
+const row_errors = ref([])
 
 const openModal = (lead) => {
   leadToDelete.value = lead;
@@ -34,8 +37,10 @@ const closeModal = () => {
 const closeModalCSV = () => showModalCSV.value = false;
 const openModalCSV = () => showModalCSV.value = true;
 
+const closeModalCSVResult = () => showModalCSVResult.value = false;
+const openModalCSVResult = () => showModalCSVResult.value = true;
+
 const propsDef = defineProps({
-  //leads: Object,
   filtros: Object,
   estados: Array,
   usuarios: Array,
@@ -59,47 +64,28 @@ const orderDirection = ref('asc');
 const form = useForm({
   file: null
 });
-// WATCH (auto búsqueda)
-watch([search, estado, usuario, interes, fuente, fechaDesde, fechaHasta], () => getRows(
-    search.value,
-    estado.value,
-    usuario.value,
-    interes.value,
-    fuente.value,
-    fechaDesde.value,
-    fechaHasta.value,
-    page.value,
-    orderBy.value,
-    orderDirection.value
-));
 
-onMounted(() => getRows(
-    search.value,
-    estado.value,
-    usuario.value,
-    interes.value,
-    fuente.value,
-    fechaDesde.value,
-    fechaHasta.value,
-    page.value,
-    orderBy.value,
-    orderDirection.value
-  ));
+const getInitialRowd = () => getRows(
+  search.value,
+  estado.value,
+  usuario.value,
+  interes.value,
+  fuente.value,
+  fechaDesde.value,
+  fechaHasta.value,
+  page.value,
+  orderBy.value,
+  orderDirection.value
+)
+
+// WATCH (auto búsqueda)
+watch([search, estado, usuario, interes, fuente, fechaDesde, fechaHasta], () => getInitialRowd());
+
+onMounted(() => getInitialRowd());
 
 const changePage = (page_selected) => {
   page.value = page_selected
-  getRows(
-    search.value,
-    estado.value,
-    usuario.value,
-    interes.value,
-    fuente.value,
-    fechaDesde.value,
-    fechaHasta.value,
-    page.value,
-    orderBy.value,
-    orderDirection.value
-  )
+  getInitialRowd()
 }
 
 const sort = (column) => {
@@ -179,19 +165,8 @@ const eliminar = (id) => {
 
   router.delete(`/leads/${leadToDelete.value.id}`, {
     onSuccess: () => {
+      getInitialRowd()
       closeModal()
-      getRows(
-        search.value,
-        estado.value,
-        usuario.value,
-        interes.value,
-        fuente.value,
-        fechaDesde.value,
-        fechaHasta.value,
-        page.value,
-        orderBy.value,
-        orderDirection.value
-      )
     }
   });
 };
@@ -219,42 +194,23 @@ const handleFileUpload = (e) => {
   form.file = selected;
 };
 
-const runCSV = () => {
+const runCSV = async () => {
   if (!form.file) {
     alert('Selecciona un archivo');
     return;
   }
 
-  form.post('/leads/upload-csv', {
-    forceFormData: true,
+  const formData = new FormData()
+  formData.append('file', form.file)
 
-    onStart: () => {
-      console.log('Subiendo...');
-    },
-    onProgress: (progress) => {
-      console.log(progress.percentage + '%');
-    },
-    onSuccess: () => {
-      form.reset('file');
-      closeModalCSV()
-      getRows(
-        search.value,
-        estado.value,
-        usuario.value,
-        interes.value,
-        fuente.value,
-        fechaDesde.value,
-        fechaHasta.value,
-        page.value,
-        orderBy.value,
-        orderDirection.value
-      )
+  const response = await axios.post('/leads/upload-csv', formData)
 
-    },
-    onError: (errors) => {
-      console.error(errors);
-    }
-  });
+  created.value = response.data.created
+  row_errors.value = response.data.row_errors
+
+  closeModalCSV()
+  openModalCSVResult()
+  getInitialRowd()
 };
 
 /*const sortIcon = (column) => {
@@ -501,22 +457,6 @@ const runCSV = () => {
      <div>
         <Pagination :meta="leads.meta" @set-page="changePage"/>
     </div>
-    <!--div class="flex justify-center gap-2">
-
-      <button
-        v-for="link in leads.links"
-        :key="link.label"
-        v-html="link.label"
-        @click="router.visit(link.url)"
-        :disabled="!link.url"
-        class="px-3 py-1 border rounded text-sm"
-        :class="{
-          'bg-blue-600 text-white': link.active,
-          'text-gray-400': !link.url
-        }"
-      />
-
-    </div-->
 
     <!-- MODAL -->
     <Modal :show="showModal" @close="closeModal">
@@ -532,7 +472,7 @@ const runCSV = () => {
       <div class="flex justify-end gap-2">
         <button
           @click="closeModal"
-          class="px-4 py-2 border rounded"
+          class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300"
         >
           Cancelar
         </button>
@@ -563,14 +503,11 @@ const runCSV = () => {
         {{ form.errors.file }}
       </div>
 
-      <div v-if="form.progress" class="text-sm text-gray-500 mt-1">
-        {{ form.progress.percentage }}%
-      </div>
 
       <div class="flex justify-end gap-2">
         <button
           @click="closeModalCSV"
-          class="px-4 py-2 border rounded"
+          class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300"
         >
           Cancelar
         </button>
@@ -580,6 +517,54 @@ const runCSV = () => {
           class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Ejecutar
+        </button>
+      </div>
+    </Modal>
+
+    <Modal :show="showModalCSVResult" @close="closeModalCSVResult">
+      <h2 class="text-lg font-bold mb-2">
+        Resultado
+      </h2>
+
+      <div class="bg-green-100 text-green-800 p-3 rounded mb-4">
+        Proceso Terminado - Insertados: {{ created }}
+      </div>
+
+      <div v-if="row_errors.length" class="bg-red-100 p-4 rounded">
+        <h3 class="text-red-700 font-bold mb-2">
+            Errores encontrados ({{ row_errors.length }})
+        </h3>
+
+        <div class="overflow-auto max-h-64">
+          <table class="min-w-full text-sm border">
+            <thead class="bg-red-200">
+              <tr>
+                <th class="p-2 border">Fila</th>
+                <th class="p-2 border">Error</th>
+                <th class="p-2 border">Datos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(error, i) in row_errors" :key="i" class="bg-white">
+                <td class="p-2 border">{{ error.row }}</td>
+                <td class="p-2 border text-red-600">
+                    {{ error.error }}
+                </td>
+                <td class="p-2 border text-xs">
+                    {{ error.data.join(', ') }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          @click="closeModalCSVResult"
+          class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300"
+        >
+          Aceptar
         </button>
       </div>
     </Modal>

@@ -13,8 +13,10 @@ class SeguimientoController extends Controller
     {
         $user = Auth::user();
 
+        print_r($user);
+
         // Solo jefe o dueño del lead
-        if ($user->rol === 'ASESOR' && $lead->usuario_id !== $user->id) {
+        if ($user->rol === 'ASESOR' && $lead->usuario_id != $user->id) {
             abort(403);
         }
 

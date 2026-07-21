@@ -20,7 +20,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
-
 class LeadController extends Controller
 {
 
@@ -351,48 +350,127 @@ class LeadController extends Controller
 
         $file = $request->file('file');
 
+        $created = 0;
+        $row_errors = [];
+
         if (($handle = fopen($file->getRealPath(), 'r')) !== false) {
 
             $header = fgetcsv($handle);
-
+            $row_i = 1;
+            
             while (($row = fgetcsv($handle)) !== false) {
-                $sede = (empty($row[7])) ? null : Sede::where('nombre', $row[7])->first();
-                $carrera = (empty($row[8])) ? null : Carrera::where('nombre', $row[8])->first();
-                $horario = (empty($row[9])) ? null : Horario::where('nombre', $row[9])->first();
-                $estado = (empty($row[10])) ? null : Estado::where('nombre', $row[10])->first();
-                $fuente = (empty($row[11])) ? null : Fuente::where('nombre', $row[11])->first();
-                $promocion = (empty($row[12])) ? null : Promocion::where('nombre', $row[12])->first();
 
-                $fecha_registro = (empty($row[14])) ? now() : Carbon::parse($row[14])->format('Y-m-d H:i:s');
-                $ultimo_contacto = (empty($row[15])) ? now() : Carbon::parse($row[15])->format('Y-m-d H:i:s');
+                try {
+                    $this->saveNewCSVRow($row);
+                    $created++;
+                } catch (\Throwable $e) {
+                    $row_errors[] = [
+                        'row' => $row_i,
+                        'data' => $row,
+                        'error' => $e->getMessage()
+                    ];
+                }
 
-                // Ajusta según tus columnas CSV
-                Lead::create([
-                    'nombre' => $row[0] ?? null,
-                    'apellido_paterno' => $row[1] ?? null,
-                    'apellido_materno' => $row[2] ?? null,
-                    'codigo_pais' => $row[3] ?? '591',
-                    'celular' => $row[4] ?? null,
-                    'genero' => $row[5] ?? null,
-                    'ciudad' => $row[6] ?? null,
-
-                    'sede_id' => $sede->id ?? null,
-                    'carrera_id' => $carrera->id ?? null,
-                    'horario_id' => $horario->id ?? null,
-                    'estado_id' => $estado->id ?? null,
-                    'fuente_id' => $fuente->id ?? null,
-                    'promocion_id' => $promocion->id ?? null,
-
-                    'interes_nivel' => $row[13] ?? null,
-                    'fecha_registro' => $fecha_registro,
-                    'ultimo_contacto' => $ultimo_contacto,
-                    'observaciones' => $row[16] ?? null,
-                ]);
+                $row_i++;
             }
 
             fclose($handle);
         }
 
-        return redirect()->back()->with('success', 'Leads creados');
+        return response()->json([
+            'success' => 'Proceso terminado',
+            'created' => $created,
+            'row_errors' => $row_errors
+        ]);
+    }
+
+    private function saveNewCSVRow($row) {
+        $nombre = $row[0] ?? null;
+        $apellido_paterno = $row[1] ?? null;
+        $apellido_materno = $row[2] ?? null;
+        $codigo_pais = $row[3] ?? '591';
+        $celular = $row[4] ?? null;
+        $genero = $row[5] ?? null;
+        $ciudad = $row[6] ?? null;
+
+        $sede_name = $row[7] ?? null;
+        $carrera_name = $row[8] ?? null;
+        $horario_name = $row[9] ?? null;
+        $estado_name = $row[10] ?? null;
+        $fuente_name = $row[11] ?? null;
+        $promocion_name = $row[12] ?? null;
+
+        $interes_nivel = $row[13] ?? null;
+
+        $fecha_registro = $row[14] ?? now();
+        $ultimo_contacto = $row[15] ?? now();
+
+        $observaciones = $row[13] ?? null;
+
+        if (empty($nombre)) throw new \Exception("Nombre vacío");
+        if (empty($apellido_paterno) && empty($apellido_materno)) throw new \Exception("Apellidos vacios");
+        if (empty($celular)) throw new \Exception("Celular vacío");
+
+        $existe = Lead::where('celular', $celular)
+                    ->where('codigo_pais', $codigo_pais)
+                    ->exists();
+
+        if ($existe) {
+            throw new \Exception("Lead duplicado");
+        }
+
+        try {
+            $fecha_registro = Carbon::parse($fecha_registro)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            throw new \Exception("Fecha registro inválida");
+        }
+
+        try {
+            $ultimo_contacto = Carbon::parse($ultimo_contacto)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            throw new \Exception("Fecha último contacto inválida");
+        }
+
+        $sede = Sede::where('nombre', $sede_name)->first();
+        $carrera = Carrera::where('nombre', $carrera_name)->first();
+        $horario = Horario::where('nombre', $horario_name)->first();
+        $estado = Estado::where('nombre', $estado_name)->first();
+        $fuente = Fuente::where('nombre', $fuente_name)->first();
+        $promocion = Promocion::where('nombre', $promocion_name)->first();
+
+        if (is_null($sede)) throw new \Exception("No existe la sede");
+        if (is_null($estado)) throw new \Exception("No existe el estado");
+        if (is_null($fuente)) throw new \Exception("No existe la fuente");
+        if ($interes_nivel != 'Alto' && $interes_nivel != 'Medio' && $interes_nivel != 'Bajo') throw new \Exception("No existe el nivel de interes");
+
+        $sede_id = $sede->id;
+        $carrera_id = is_null($carrera) ? null : $carrera->id;
+        $horario_id = is_null($horario) ? null : $horario->id;
+        $estado_id = $estado->id;
+        $fuente_id = $fuente->id;
+        $promocion_id = is_null($promocion) ? null : $promocion->id;
+
+        Lead::create([
+            'nombre' => $nombre,
+            'apellido_paterno' => $apellido_paterno,
+            'apellido_materno' => $apellido_materno,
+            'codigo_pais' => $codigo_pais,
+            'celular' => $celular,
+            'genero' => $genero,
+            'ciudad' => $ciudad,
+
+            'sede_id' => $sede_id,
+            'carrera_id' => $carrera_id,
+            'horario_id' => $horario_id,
+            'estado_id' => $estado_id,
+            'fuente_id' => $fuente_id,
+            'promocion_id' => $promocion_id,
+
+            'interes_nivel' => $interes_nivel,
+            'fecha_registro' => $fecha_registro,
+            'ultimo_contacto' => $ultimo_contacto,
+            'observaciones' => $observaciones,
+        ]);
+
     }
 }
