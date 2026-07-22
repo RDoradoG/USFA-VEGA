@@ -14,7 +14,8 @@ class Sede extends Model
     protected $fillable = [
         'nombre',
         'ciudad',
-        'activo'
+        'activo',
+        'external_id'
     ];
 
     protected $casts = [

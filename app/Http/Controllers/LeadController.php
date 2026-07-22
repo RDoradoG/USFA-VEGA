@@ -252,13 +252,14 @@ class LeadController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->rol === 'ASESOR' && $lead->usuario_id !== $user->id) {
+        if ($user->rol === 'ASESOR' && $lead->usuario_id != $user->id) {
             abort(403);
         }
 
         $validated = $request->validate($this->getValidations($request, $lead), $this->messages);
 
         $mensajes = [];
+        $last_state = $lead->estado_id;
 
         if ($lead->estado_id != $validated['estado_id']) $mensajes[] = 'el estado a ' . Estado::where('id', $validated['estado_id'])->firstOrFail()->nombre;
         if ($lead->usuario_id != $validated['usuario_id']) $mensajes[] = 'el asesor a ' . User::where('id', $validated['usuario_id'])->firstOrFail()->nombre;
@@ -279,24 +280,43 @@ class LeadController extends Controller
         ]);
 
         //API
-        /*if ($lead->estado_id == self::STATE_ID) {
-            $this->sendToPay($last_names, $names, $sex, $id_sede, $id_carrera);
-        }*/
+        if ($lead->estado_id == self::STATE_ID) {
+            $last_names = $lead->apellido_paterno . ' ' . $lead->apellido_materno;
+            $genre = $lead->genero == 'Masculino' ? true : false;
+            $id_sede = Sede::where('id', $lead->sede_id)->firstOrFail()->external_id;
+            $id_carrera = Carrera::where('id', $lead->carrera_id)->firstOrFail()->external_id;
+
+            $response = $this->sendToPay($last_names, $lead->nombre, $genre, $id_sede, $id_carrera);
+
+            if ($response['Estado'] == 1) {
+                $lead->update(['id_reserva' => $response['Datos']['IdReserva']]);
+                return redirect()->route('leads.index')->with('success', 'Lead actualizado');
+            } else {
+                $lead->update(['estado_id' => $last_state]);
+                return redirect()->back()->with('error', 'No se pudo mandar a caja.');
+            }
+        }
 
         return redirect()->route('leads.index')->with('success', 'Lead actualizado');
     }
 
-    /*private function sendToPay($last_names, $names, $sex, $id_sede, $id_carrera) {
-        $response = Http::post('https://ecovir.usfa.edu.bo:49233/api/adhesion/new', [
-            'Apellidos' => $last_names,
-            'Nombres' => $names,
-            'Sexo' => $sex,
-            'IdSede' => $id_sede,
-            'IdCarrera' => $id_carrera
-        ]);
+    private function sendToPay($last_names, $names, $sex, $id_sede, $id_carrera) {
+        $response = Http::withBasicAuth(
+                config('services.ecovir.user'),
+                config('services.ecovir.pass')
+            )
+            ->withoutVerifying()
+            ->post('https://ecovir.usfa.edu.bo:49233/api/adhesion/new', [
+                'Apellidos' => $last_names,
+                'Nombres' => $names,
+                'Sexo' => $sex,
+                'IdSede' => $id_sede,
+                'IdCarrera' => $id_carrera
+            ]
+        );
 
         return $response->json();
-    }*/
+    }
 
     public function destroy(Lead $lead)
     {
@@ -442,6 +462,7 @@ class LeadController extends Controller
         if (is_null($estado)) throw new \Exception("No existe el estado");
         if (is_null($fuente)) throw new \Exception("No existe la fuente");
         if ($interes_nivel != 'Alto' && $interes_nivel != 'Medio' && $interes_nivel != 'Bajo') throw new \Exception("No existe el nivel de interes");
+        if ($genero != 'Masculino' && $genero != 'Femenino') throw new \Exception("Genero erroneo");
 
         $sede_id = $sede->id;
         $carrera_id = is_null($carrera) ? null : $carrera->id;

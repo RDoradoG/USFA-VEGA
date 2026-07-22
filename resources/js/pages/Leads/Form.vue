@@ -6,9 +6,11 @@ import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
 import Textarea from '@/components/ui/textarea/Textarea.vue';
 import { useForm, usePage  } from '@inertiajs/vue3';
 import dayjs from 'dayjs'
+import { computed } from 'vue';
 
-const { props } = usePage();
-const user = props.auth.user;
+const page= usePage();
+const user = page.props.auth.user;
+const error = computed(() => page.props.flash.error)
 
 const propsDef = defineProps({
   lead: Object,
@@ -23,8 +25,8 @@ const propsDef = defineProps({
 });
 
 const isJefe = user.rol === 'JEFE';
-const isOwner = propsDef.lead?.usuario_id === user.id || propsDef.lead === undefined;
-const alreadyDone = propsDef.lead?.estado_id == 6
+const isOwner = propsDef.lead?.usuario_id == user.id || propsDef.lead === undefined;
+const alreadyDone = propsDef.lead?.estado_id == 5;
 
 const canChangeState = user.rol === 'JEFE' || (isOwner && propsDef.lead !== undefined)
 
@@ -81,6 +83,10 @@ const submit = () => {
 </script>
 
 <template>
+  <div v-if="error" class="bg-red-500 text-white p-2 mb-8">
+    {{ error }}
+  </div>
+
   <form @submit.prevent="submit" class="space-y-6">
 
     <!-- DATOS BASICOS -->

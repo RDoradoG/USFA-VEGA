@@ -14,7 +14,8 @@ class Carrera extends Model
     protected $fillable = [
         'nombre',
         'descripcion',
-        'activo'
+        'activo',
+        'external_id'
     ];
 
     protected $casts = [

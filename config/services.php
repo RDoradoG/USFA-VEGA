@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'ecovir' => [
+        'user' => env('API_USER'),
+        'pass' => env('API_PASS'),
+    ],
+
 ];

@@ -3,8 +3,8 @@ import Form from './Form.vue';
 import Seguimientos from '@/components/Seguimientos.vue';
 import { usePage, Link } from '@inertiajs/vue3';
 
-const { props } = usePage();
-const user = props.auth.user;
+const page = usePage();
+const user = page.props.auth.user;
 
 const propsDef = defineProps([
   'lead',
@@ -20,8 +20,8 @@ const propsDef = defineProps([
 ]);
 
 const isJefe = user.rol === 'JEFE';
-const isOwner = propsDef.lead.usuario_id === user.id;
-const alreadyDone = propsDef.lead.estado_id == 6;
+const isOwner = propsDef.lead.usuario_id == user.id;
+const alreadyDone = propsDef.lead.estado_id == 5;
 
 // permisos
 const canEdit = (isJefe || isOwner) && ! alreadyDone;
@@ -30,6 +30,10 @@ const canEdit = (isJefe || isOwner) && ! alreadyDone;
 
 <template>
   <div class="p-6 space-y-6">
+
+    <!--div v-if="$page.props.flash.error" class="bg-red-500 text-white p-2">
+      {{ $page.props.flash.error }}
+    </div-->
 
     <!-- HEADER -->
     <div class="flex justify-between items-center">
