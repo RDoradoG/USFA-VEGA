@@ -15,8 +15,7 @@ class Lead extends Model
 
     protected $fillable = [
         'nombre',
-        'apellido_paterno',
-        'apellido_materno',
+        'apellidos',
         'codigo_pais',
         'celular',
         'genero',
@@ -49,8 +48,7 @@ class Lead extends Model
         return Attribute::make(
             get: fn () => trim(implode(' ', array_filter([
                 $this->nombre,
-                $this->apellido_paterno,
-                $this->apellido_materno
+                $this->apellidos
             ])))
         );
     }

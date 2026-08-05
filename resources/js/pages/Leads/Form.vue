@@ -46,8 +46,7 @@ const interests = [
 
 const form = useForm({
   nombre: propsDef.lead?.nombre || '',
-  apellido_paterno: propsDef.lead?.apellido_paterno || '',
-  apellido_materno: propsDef.lead?.apellido_materno || '',
+  apellidos: propsDef.lead?.apellidos || '',
   codigo_pais: propsDef.lead?.codigo_pais || '591',
   celular: propsDef.lead?.celular || '',
   genero: propsDef.lead?.genero || '',
@@ -98,15 +97,14 @@ const submit = () => {
       </div>
 
       <div>
-        <Label>Apellido Paterno</Label>
-        <Input v-model="form.apellido_paterno" placeholder="Apellido Paterno" :disabled="!canEdit" :class="{'border-red-500': form.errors.apellido_paterno}" />
-        <p v-if="form.errors.apellido_paterno" class="text-red-500 text-sm mt-1">{{ form.errors.apellido_paterno }}</p>
+        <Label>Apellidos</Label>
+        <Input v-model="form.apellidos" placeholder="Apellidos" :disabled="!canEdit" :class="{'border-red-500': form.errors.apellidos}" />
+        <p v-if="form.errors.apellidos" class="text-red-500 text-sm mt-1">{{ form.errors.apellidos }}</p>
       </div>
 
       <div>
-        <Label>Apellido Materno</Label>
-        <Input v-model="form.apellido_materno" placeholder="Apellido Materno" :disabled="!canEdit" :class="{'border-red-500': form.errors.apellido_materno}" />
-        <p v-if="form.errors.apellido_materno" class="text-red-500 text-sm mt-1">{{ form.errors.apellido_materno }}</p>
+        <Label>Género</Label>
+        <Selectlist v-model="form.genero" :options="genreOptions" :disabled="!canEdit" />
       </div>
     </div>
 
@@ -125,25 +123,20 @@ const submit = () => {
           <p v-if="form.errors.celular" class="text-red-500 text-sm mt-1">{{ form.errors.celular }}</p>
         </div>
       </div>
-
-      <div>
-        <Label>Género</Label>
-        <Selectlist v-model="form.genero" :options="genreOptions" :disabled="!canEdit" />
-      </div>
-
+      
       <div>
         <Label>Ciudad</Label>
         <Input v-model="form.ciudad" placeholder="Ciudad" :disabled="!canEdit" />
       </div>
-    </div>
 
-    <div class="grid grid-cols-3 gap-4">
       <div>
         <Label required>Sede</Label>
         <Selectlist v-model="form.sede_id" :options="sedes" :key="'id'" :value="'nombre'" :disabled="!canEdit" :class="{'border-red-500': form.errors.sede_id}" />
         <p v-if="form.errors.sede_id" class="text-red-500 text-sm mt-1">{{ form.errors.sede_id }}</p>
       </div>
+    </div>
 
+    <div class="grid grid-cols-3 gap-4">
       <div>
         <Label required>Carrera</Label>
         <Selectlist v-model="form.carrera_id" :options="carreras" :key="'id'" :value="'nombre'" :disabled="!canEdit" />
@@ -152,6 +145,12 @@ const submit = () => {
       <div>
         <Label required>Horario</Label>
         <Selectlist v-model="form.horario_id" :options="horarios" :key="'id'" :value="'nombre'" :disabled="!canEdit" />
+      </div>
+
+      <div>
+        <Label required>Fuente</Label>
+        <Selectlist v-model="form.fuente_id" :options="fuentes" :key="'id'" :value="'nombre'" :disabled="!canEdit" :class="{'border-red-500': form.errors.fuente_id}" />
+        <p v-if="form.errors.fuente_id" class="text-red-500 text-sm mt-1">{{ form.errors.fuente_id }}</p>
       </div>
     </div>
 
@@ -176,19 +175,13 @@ const submit = () => {
       </div>
 
       <div>
-        <Label required>Fuente</Label>
-        <Selectlist v-model="form.fuente_id" :options="fuentes" :key="'id'" :value="'nombre'" :disabled="!canEdit" :class="{'border-red-500': form.errors.fuente_id}" />
-        <p v-if="form.errors.fuente_id" class="text-red-500 text-sm mt-1">{{ form.errors.fuente_id }}</p>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-3 gap-4">
-      <div>
         <Label required>Nivel de interés</Label>
         <Selectlist v-model="form.interes_nivel" :options="interests" :disabled="!canEdit" :class="{'border-red-500': form.errors.interes_nivel}" />
         <p v-if="form.errors.interes_nivel" class="text-red-500 text-sm mt-1">{{ form.errors.interes_nivel }}</p>
       </div>
+    </div>
 
+    <div class="grid grid-cols-3 gap-4">
       <div>
         <Label>Promoción</Label>
         <Selectlist v-model="form.promocion_id" :options="promociones" :key="'id'" :value="'nombre'" :disabled="!canEdit" />

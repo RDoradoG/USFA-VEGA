@@ -25,8 +25,7 @@ class LeadController extends Controller
 
     private $validation = [
         'nombre' => 'required|string|max:255',
-        'apellido_paterno' => 'nullable|string|max:255|required_without:apellido_materno',
-        'apellido_materno' => 'nullable|string|max:255|required_without:apellido_paterno',
+        'apellidos' => 'required|string|max:255',
         'codigo_pais' => '',
         'celular' => '',
         'genero' => 'nullable|string',
@@ -47,8 +46,7 @@ class LeadController extends Controller
 
     private $messages = [
         'nombre.required' => 'El nombre es obligatorio.',
-        'apellido_paterno.required_without' => 'Debes ingresar al menos un apellido.',
-        'apellido_materno.required_without' => 'Debes ingresar al menos un apellido.',
+        'apellidos.required' => 'El apellido es obligatorio.',
         'celular.required' => 'El celular es obligatorio.',
         'celular.unique' => 'Ya existe un lead con este número de celular.',
         'sede_id.required' => 'La sede es obligatoria.',
@@ -126,8 +124,7 @@ class LeadController extends Controller
 
             $query->where(function ($q) use ($filterStr) {
                 $q->where('nombre', 'like', $filterStr)
-                ->orWhere('apellido_paterno', 'like', $filterStr)
-                ->orWhere('apellido_materno', 'like', $filterStr)
+                ->orWhere('apellidos', 'like', $filterStr)
                 ->orWhere('celular', 'like', $filterStr)
                 ->orWhere('ciudad', 'like', $filterStr);
             });
@@ -281,7 +278,7 @@ class LeadController extends Controller
 
         //API
         if ($lead->estado_id == self::STATE_ID) {
-            $last_names = $lead->apellido_paterno . ' ' . $lead->apellido_materno;
+            $last_names = $lead->apellidos;
             $genre = $lead->genero == 'Masculino' ? true : false;
             $id_sede = Sede::where('id', $lead->sede_id)->firstOrFail()->external_id;
             $id_carrera = Carrera::where('id', $lead->carrera_id)->firstOrFail()->external_id;
@@ -406,29 +403,28 @@ class LeadController extends Controller
 
     private function saveNewCSVRow($row) {
         $nombre = $row[0] ?? null;
-        $apellido_paterno = $row[1] ?? null;
-        $apellido_materno = $row[2] ?? null;
-        $codigo_pais = $row[3] ?? '591';
-        $celular = $row[4] ?? null;
-        $genero = $row[5] ?? null;
-        $ciudad = $row[6] ?? null;
+        $apellidos = $row[1] ?? null;
+        $codigo_pais = $row[2] ?? '591';
+        $celular = $row[3] ?? null;
+        $genero = $row[4] ?? null;
+        $ciudad = $row[5] ?? null;
 
-        $sede_name = $row[7] ?? null;
-        $carrera_name = $row[8] ?? null;
-        $horario_name = $row[9] ?? null;
-        $estado_name = $row[10] ?? null;
-        $fuente_name = $row[11] ?? null;
-        $promocion_name = $row[12] ?? null;
+        $sede_name = $row[6] ?? null;
+        $carrera_name = $row[7] ?? null;
+        $horario_name = $row[8] ?? null;
+        $estado_name = $row[9] ?? null;
+        $fuente_name = $row[10] ?? null;
+        $promocion_name = $row[11] ?? null;
 
-        $interes_nivel = $row[13] ?? null;
+        $interes_nivel = $row[12] ?? null;
 
-        $fecha_registro = $row[14] ?? now();
-        $ultimo_contacto = $row[15] ?? now();
+        $fecha_registro = $row[13] ?? now();
+        $ultimo_contacto = $row[14] ?? now();
 
-        $observaciones = $row[13] ?? null;
+        $observaciones = $row[15] ?? null;
 
         if (empty($nombre)) throw new \Exception("Nombre vacío");
-        if (empty($apellido_paterno) && empty($apellido_materno)) throw new \Exception("Apellidos vacios");
+        if (empty($apellidos)) throw new \Exception("Apellidos vacio");
         if (empty($celular)) throw new \Exception("Celular vacío");
 
         $existe = Lead::where('celular', $celular)
@@ -473,8 +469,7 @@ class LeadController extends Controller
 
         Lead::create([
             'nombre' => $nombre,
-            'apellido_paterno' => $apellido_paterno,
-            'apellido_materno' => $apellido_materno,
+            'apellidos' => $apellidos,
             'codigo_pais' => $codigo_pais,
             'celular' => $celular,
             'genero' => $genero,
