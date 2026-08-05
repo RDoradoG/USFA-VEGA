@@ -153,8 +153,8 @@ class LeadController extends Controller
                 break;
 
             case 'usuario':
-                $query->leftJoin('users', 'leads.usuario_id', '=', 'users.id')
-                    ->orderBy('users.nombre', $orderDirection);
+                $query->leftJoin('usuarios', 'leads.usuario_id', '=', 'usuarios.id')
+                    ->orderBy('usuarios.nombre', $orderDirection);
                 break;
 
             case 'estado':
