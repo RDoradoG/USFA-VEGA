@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'client' => EnsureClientToken::class,
+            'superadmin.basic' => \App\Http\Middleware\SuperAdminBasicAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

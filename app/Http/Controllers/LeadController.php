@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class LeadController extends Controller
 {
@@ -243,6 +244,29 @@ class LeadController extends Controller
             'promociones' => Promocion::all(),
             'history_lead' => HistoryLead::where('lead_id', $lead->id)->orderBy('created_at', 'asc')->get()
         ]);
+    }
+
+    public function getRecordsApi(Request $request)
+    {
+        $leads = DB::table('leads')
+            ->leftJoin('sedes', 'sedes.id', '=', 'leads.sede_id')
+            ->leftJoin('carreras', 'carreras.id', '=', 'leads.carrera_id')
+            ->leftJoin('estados', 'estados.id', '=', 'leads.estado_id')
+            ->leftJoin('fuentes', 'fuentes.id', '=', 'leads.fuente_id')
+            ->leftJoin('horarios', 'horarios.id', '=', 'leads.horario_id')
+            ->leftJoin('promociones', 'promociones.id', '=', 'leads.promocion_id')
+            ->select([
+                'leads.*',
+                'sedes.nombre as sede',
+                'carreras.nombre as carrera',
+                'estados.nombre as estado',
+                'fuentes.nombre as fuente',
+                'horarios.nombre as horario',
+                'promociones.nombre as promocion',
+            ])
+            ->get();
+
+        return response()->json($leads);
     }
 
     public function updateApi(Request $request, $id)

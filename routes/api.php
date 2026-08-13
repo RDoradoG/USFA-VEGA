@@ -17,5 +17,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('client')->group(function () {
     Route::post('pagos', [PagoController::class, 'store']);
-    Route::post('leads/{id}', [LeadController::class, 'updateApi']);
+    Route::post('leads/{id}', [LeadController::class, 'updateApi']);    
+});
+
+Route::middleware('superadmin.basic')->group(function () {
+    Route::get('leads', [LeadController::class, 'getRecordsApi']);
 });
