@@ -245,6 +245,123 @@ class LeadController extends Controller
         ]);
     }
 
+    public function updateApi(Request $request, $id)
+    {
+        $lead = Lead::where('id', $id)->firstOrFail();
+
+        $changes = [];
+        $messages = [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Campos simples
+        |--------------------------------------------------------------------------
+        */
+        $simpleFields = [
+            'nombre'       => 'el nombre',
+            'apellidos'    => 'los apellidos',
+            'codigo_pais'  => 'el código de país',
+            'celular'      => 'el celular',
+            'ciudad'       => 'la ciudad',
+        ];
+
+        foreach ($simpleFields as $field => $label) {
+            if ($request->filled($field)) {
+                $changes[$field] = $request->input($field);
+                $messages[] = "{$label} a {$request->input($field)}";
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Género
+        |--------------------------------------------------------------------------
+        */
+        if ($request->filled('genero')) {
+            $generosValidos = ['Masculino', 'Femenino'];
+
+            if (in_array($request->input('genero'), $generosValidos, true)) {
+                $changes['genero'] = $request->input('genero');
+
+                $messages[] = 'el género a ' . $request->input('genero');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Relaciones
+        |--------------------------------------------------------------------------
+        */
+        $relations = [
+            'sede' => [
+                'model' => Sede::class,
+                'column' => 'external_id',
+                'lead_column' => 'sede_id',
+                'label' => 'la sede',
+                'display' => 'nombre',
+            ],
+            'carrera' => [
+                'model' => Carrera::class,
+                'column' => 'external_id',
+                'lead_column' => 'carrera_id',
+                'label' => 'la carrera',
+                'display' => 'nombre',
+            ],
+            'horario' => [
+                'model' => Horario::class,
+                'column' => 'nombre',
+                'lead_column' => 'horario_id',
+                'label' => 'el horario',
+                'display' => 'nombre',
+            ],
+            'fuente' => [
+                'model' => Fuente::class,
+                'column' => 'nombre',
+                'lead_column' => 'fuente_id',
+                'label' => 'la fuente',
+                'display' => 'nombre',
+            ],
+        ];
+
+        foreach ($relations as $field => $config) {
+            if (!$request->filled($field)) {
+                continue;
+            }
+
+            $model = $config['model'];
+
+            $relation = $model::where(
+                $config['column'],
+                $request->input($field)
+            )->firstOrFail();
+
+            $changes[$config['lead_column']] = $relation->id;
+
+            $messages[] = "{$config['label']} a {$relation->{$config['display']}}";
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Actualizar Lead
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($changes)) {
+            $lead->update($changes);
+
+            HistoryLead::create([
+                'usuario_id' => 1,
+                'lead_id' => $lead->id,
+                'mensaje' => 'Usuario API modificó ' . implode(', ', $messages) . '.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead actualizado.',
+        ]);
+    }
+
     public function update(Request $request, Lead $lead)
     {
         $user = Auth::user();

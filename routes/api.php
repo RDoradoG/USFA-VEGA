@@ -17,4 +17,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('client')->group(function () {
     Route::post('pagos', [PagoController::class, 'store']);
+    Route::post('leads/{id}', [LeadController::class, 'updateApi']);
 });
