@@ -27,7 +27,7 @@ class PagoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate($this->validation, $this->messages);
-        $lead = Lead::where('id_reserva', $validated->idReserva)->firstOrFail();
+        $lead = Lead::where('id_reserva', $validated['idReserva'])->firstOrFail();
 
         $validated['lead_id'] = $lead->id;
 
