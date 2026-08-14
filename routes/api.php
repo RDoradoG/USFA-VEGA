@@ -21,5 +21,5 @@ Route::middleware('client')->group(function () {
 });
 
 Route::middleware('superadmin.basic')->group(function () {
-    Route::get('leads', [LeadController::class, 'getRecordsApi']);
+    Route::get('leadsPBI', [LeadController::class, 'getRecordsApi']);
 });
