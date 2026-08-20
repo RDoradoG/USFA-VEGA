@@ -255,6 +255,7 @@ class LeadController extends Controller
             ->leftJoin('fuentes', 'fuentes.id', '=', 'leads.fuente_id')
             ->leftJoin('horarios', 'horarios.id', '=', 'leads.horario_id')
             ->leftJoin('promociones', 'promociones.id', '=', 'leads.promocion_id')
+            ->leftJoin('usuarios', 'usuarios.id', '=', 'leads.usuario_id')
             ->select([
                 'leads.*',
                 'sedes.nombre as sede',
@@ -263,6 +264,7 @@ class LeadController extends Controller
                 'fuentes.nombre as fuente',
                 'horarios.nombre as horario',
                 'promociones.nombre as promocion',
+                'usuarios.nombre as asesor'
             ])
             ->get();
 
@@ -424,7 +426,9 @@ class LeadController extends Controller
             $id_sede = Sede::where('id', $lead->sede_id)->firstOrFail()->external_id;
             $id_carrera = Carrera::where('id', $lead->carrera_id)->firstOrFail()->external_id;
 
-            $response = $this->sendToPay($last_names, $lead->nombre, $genre, $id_sede, $id_carrera);
+            $promocion = Promocion::where('id', $lead->promocion_id)->first();
+
+            $response = $this->sendToPay($last_names, $lead->nombre, $genre, $id_sede, $id_carrera, $promocion);
 
             if ($response['Estado'] == 1) {
                 $lead->update(['id_reserva' => $response['Datos']['IdReserva']]);
@@ -438,7 +442,23 @@ class LeadController extends Controller
         return redirect()->route('leads.index')->with('success', 'Lead actualizado');
     }
 
-    private function sendToPay($last_names, $names, $sex, $id_sede, $id_carrera) {
+    private function getPromocionData(Promocion $promocion) {
+        if (is_null($promocion)) {
+            return [
+                'nombre' => null,
+                'descripcion' => null,
+                'beca' => null
+            ];
+        } else {
+            return [
+                'nombre' => $promocion->nombre,
+                'descripcion' => $promocion->descripcion,
+                'beca' => $promocion->beca
+            ];
+        }
+    }
+
+    private function sendToPay($last_names, $names, $genre, $id_sede, $id_carrera, Promocion $promocion) {
         $response = Http::withBasicAuth(
                 config('services.ecovir.user'),
                 config('services.ecovir.pass')
@@ -447,9 +467,10 @@ class LeadController extends Controller
             ->post('https://ecovir.usfa.edu.bo:49233/api/adhesion/new', [
                 'Apellidos' => $last_names,
                 'Nombres' => $names,
-                'Sexo' => $sex,
+                'Sexo' => $genre,
                 'IdSede' => $id_sede,
-                'IdCarrera' => $id_carrera
+                'IdCarrera' => $id_carrera,
+                //'promocion' => $this->getPromocionData($promocion)
             ]
         );
 

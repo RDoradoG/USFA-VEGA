@@ -20,6 +20,9 @@ class UpdateLeadState extends Command
     protected $description = 'Actualiza el estado de los leads en no contactados'; 
 
     private const STATE_ID_NO_CONTACT = 2;
+    private const STATE_ID_PAY = 5;
+    private const STATE_ID_IN = 6;
+    private const STATE_ID_OUT = 7;
 
     /**
      * Execute the console command.
@@ -34,7 +37,12 @@ class UpdateLeadState extends Command
         $updated = Lead::where(function ($query) use ($fechaLimite) {
             $query->whereNull('ultimo_contacto')
                 ->orWhere('ultimo_contacto', '<', $fechaLimite);
-        })->where('estado_id', '!=', self::STATE_ID_NO_CONTACT)->update(['estado_id' => self::STATE_ID_NO_CONTACT]);
+        })
+        ->where('estado_id', '!=', self::STATE_ID_NO_CONTACT)
+        ->where('estado_id', '!=', self::STATE_ID_PAY)
+        ->where('estado_id', '!=', self::STATE_ID_IN)
+        ->where('estado_id', '!=', self::STATE_ID_OUT)
+        ->update(['estado_id' => self::STATE_ID_NO_CONTACT]);
 
         $this->info("Leads actualizados: {$updated}");
     }
