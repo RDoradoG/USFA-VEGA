@@ -446,13 +446,11 @@ class LeadController extends Controller
         if (is_null($promocion)) {
             return [
                 'nombre' => null,
-                'descripcion' => null,
                 'beca' => null
             ];
         } else {
             return [
                 'nombre' => $promocion->nombre,
-                'descripcion' => $promocion->descripcion,
                 'beca' => $promocion->beca
             ];
         }
