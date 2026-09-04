@@ -6,10 +6,8 @@ import { PencilRuler, ShieldCheck, ShieldX } from 'lucide-vue-next';
 
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
-import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
 import { useAPIs } from '@/composables/useAPI';
 import { Pagination } from '@/components/ui/pagination'
-import { promiseHooks } from 'v8';
 
 const propsDef = defineProps({
   filtros: Object,
@@ -158,14 +156,14 @@ const submitConfig = () => {
           <td class="px-4 py-2">
             <span
               class="px-2 py-1 rounded text-xs bg-green-100 text-green-700"
-              v-if="promo.activo"
+              v-if="promo.activo == 1"
             >
               ACTIVO
             </span>
 
             <span
               class="px-2 py-1 rounded text-xs bg-red-100 text-red-700"
-              v-if="!promo.activo"
+              v-if="promo.activo != 1"
             >
               INACTIVO
             </span>

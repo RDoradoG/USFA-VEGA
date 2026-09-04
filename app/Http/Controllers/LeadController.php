@@ -248,6 +248,8 @@ class LeadController extends Controller
 
     public function getRecordsApi(Request $request)
     {
+
+        return response()->json(Lead::get());
         $leads = DB::table('leads')
             ->leftJoin('sedes', 'sedes.id', '=', 'leads.sede_id')
             ->leftJoin('carreras', 'carreras.id', '=', 'leads.carrera_id')
@@ -444,19 +446,16 @@ class LeadController extends Controller
 
     private function getPromocionData(Promocion $promocion) {
         if (is_null($promocion)) {
-            return [
-                'nombre' => null,
-                'beca' => null
-            ];
+            return null;
         } else {
             return [
-                'nombre' => $promocion->nombre,
-                'beca' => $promocion->beca
+                'Nombre' => $promocion->nombre,
+                'Beca' => $promocion->beca
             ];
         }
     }
 
-    private function sendToPay($last_names, $names, $genre, $id_sede, $id_carrera, Promocion $promocion) {
+    private function sendToPay($last_names, $names, $genre, $id_sede, $id_carrera, ?Promocion $promocion) {
         $response = Http::withBasicAuth(
                 config('services.ecovir.user'),
                 config('services.ecovir.pass')
@@ -468,7 +467,7 @@ class LeadController extends Controller
                 'Sexo' => $genre,
                 'IdSede' => $id_sede,
                 'IdCarrera' => $id_carrera,
-                //'promocion' => $this->getPromocionData($promocion)
+                'Promocion' => $this->getPromocionData($promocion)
             ]
         );
 

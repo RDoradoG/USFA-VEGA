@@ -143,4 +143,9 @@ class UserController extends BaseController
         $user->update($data);
         return back();
     }
+
+    public function getRecordsApi(Request $request)
+    {
+        return response()->json(User::get());
+    }
 }

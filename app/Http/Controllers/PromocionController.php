@@ -142,4 +142,9 @@ class PromocionController extends Controller
 
         return redirect()->route('promos.index')->with('success', 'Configuración actualizada');
     }
+
+    public function getRecordsApi(Request $request)
+    {
+        return response()->json(Promocion::get());
+    }
 }
