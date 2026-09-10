@@ -128,7 +128,7 @@ class UserController extends BaseController
 
     public function destroy(User $user)
     {
-        if ($user->id === Auth::user()->id()) {
+        if ($user->id === Auth::user()->id) {
             return back()->withErrors('No puedes eliminarte');
         }
 
