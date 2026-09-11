@@ -146,6 +146,6 @@ class UserController extends BaseController
 
     public function getRecordsApi(Request $request)
     {
-        return response()->json(User::get());
+        return response()->json(User::where('activo', 1)->get());
     }
 }
