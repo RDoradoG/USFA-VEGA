@@ -227,7 +227,15 @@ const runCSV = async () => {
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold">Leads</h1>
 
-      <div>
+      <div class="flex flex-wrap items-center gap-2">
+        <a
+          v-if="isJefe"
+          href="/leads/template"
+          class="bg-gray-600 text-white mr-4 px-4 py-1 rounded hover:bg-gray-700"
+        >
+          Plantilla
+      </a>
+
         <button
           v-if="isJefe"
           @click="openModalCSV"
@@ -238,7 +246,7 @@ const runCSV = async () => {
 
         <Link
           href="/leads/create"
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          class="bg-blue-600 text-white mr-4 px-4 py-1 rounded hover:bg-blue-700"
         >
           + Nuevo Lead
         </Link>

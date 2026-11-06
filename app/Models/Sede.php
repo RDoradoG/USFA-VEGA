@@ -26,4 +26,14 @@ class Sede extends Model
     {
         return $this->hasMany(Lead::class);
     }
+
+    public function abandonoDeserciones()
+    {
+        return $this->hasMany(AbandonoDesercion::class);
+    }
+
+    public function estudianteCarreras()
+    {
+        return $this->hasMany(EstudianteCarrera::class);
+    }
 }

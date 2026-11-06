@@ -11,7 +11,9 @@ class HistoryLead extends Model
     protected $fillable = [
         'mensaje',
         'lead_id',
-        'usuario_id'
+        'usuario_id',
+        'seguimiento_estudiante_id',
+        'type'
     ];
 
     public function lead()

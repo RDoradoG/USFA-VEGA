@@ -10,14 +10,18 @@ use App\Http\Controllers\SedeController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\FuenteController;
 use App\Http\Controllers\HorarioController;
+use App\Http\Controllers\SeguimientoEstudianteController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('leads', [LeadController::class, 'list']);
     Route::get('users', [UserController::class, 'list']);
     Route::get('promos', [PromocionController::class, 'list']);
+    Route::get('dropoffs', [SeguimientoEstudianteController::class, 'list']);
 
     Route::put('promos/{id}/activate', [PromocionController::class, 'activate']);
     Route::put('promos/{id}/inactivate', [PromocionController::class, 'inactivate']);
+
+    Route::post('/dropoffs/sync', [SeguimientoEstudianteController::class, 'syncDropoffs']);
 });
 
 Route::middleware('client')->group(function () {

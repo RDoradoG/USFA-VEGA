@@ -59,6 +59,11 @@ class User extends Authenticatable
         return $this->hasMany(Lead::class, 'usuario_id');
     }
 
+    public function seguimientoEstudiantes()
+    {
+        return $this->hasMany(SeguimientoEstudiante::class);
+    }
+
     public function seguimientos()
     {
         return $this->hasMany(Seguimiento::class, 'usuario_id');

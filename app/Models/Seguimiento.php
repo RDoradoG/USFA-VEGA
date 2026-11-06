@@ -17,7 +17,9 @@ class Seguimiento extends Model
         'tipo',
         'resultado',
         'observacion',
-        'fecha_contacto'
+        'fecha_contacto',
+        'seguimiento_estudiante_id',
+        'type'
     ];
 
     protected $casts = [

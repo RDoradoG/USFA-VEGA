@@ -5,8 +5,11 @@ import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
 import Input from '@/components/ui/input/Input.vue';
 
 const props = defineProps({
-  lead: Object
+  lead: Object,
+  dropoff: Boolean 
 });
+
+const uri = props.dropoff ? 'dropoffs' : 'leads'
 
 const { props: page } = usePage();
 const user = page.auth.user;
@@ -38,7 +41,7 @@ const searchResult = (id) => {
 }
 
 const submit = () => {
-  form.post(`/leads/${props.lead.id}/seguimientos`, {
+  form.post(`/${uri}/${props.lead.id}/seguimientos`, {
     preserveScroll: true,
     onSuccess: () => {
       form.reset();

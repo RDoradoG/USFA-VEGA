@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid, User, Album } from 'lucide-vue-next';
+import { BookOpen, FolderGit2, LayoutGrid, User, Album, Blocks, CalendarClock } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
-import NavFooter from '@/components/NavFooter.vue';
+//import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -14,7 +14,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+//import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 const { props } = usePage();
@@ -28,6 +28,12 @@ const mainNavItems: NavItem[] = [
         title: 'Leads',
         href: '/leads',
         icon: LayoutGrid,
+        show: true
+    },
+    {
+        title: 'Abandonos y Desrciones',
+        href: '/dropoffs',
+        icon: Blocks,
         show: true
     },
     {

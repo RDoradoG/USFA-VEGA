@@ -11,4 +11,14 @@ class CarreraController extends Controller
     {
         return response()->json(Carrera::get());
     }
+
+    public static function getAllMap()
+    {
+        $carreras = Carrera::get();
+        $map = [];
+
+        foreach($carreras as $carrera) $map[$carrera->external_id] = $carrera->id;
+
+        return $map;
+    }
 }

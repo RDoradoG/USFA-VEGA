@@ -11,4 +11,14 @@ class SedeController extends Controller
     {
         return response()->json(Sede::get());
     }
+
+    public static function getAllMap()
+    {
+        $sedes = Sede::get();
+        $map = [];
+
+        foreach($sedes as $sede) $map[$sede->external_id] = $sede->id;
+
+        return $map;
+    }
 }

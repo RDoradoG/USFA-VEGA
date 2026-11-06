@@ -57,6 +57,7 @@ class LeadController extends Controller
     ];
 
     private const STATE_ID = 5;
+    private const TEMPALTE_ROUTE = 'app/public/templates/leads.xlsx';
 
     private function getValidations(Request $request, $lead = null)
     {
@@ -434,6 +435,7 @@ class LeadController extends Controller
 
             if ($response['Estado'] == 1) {
                 $lead->update(['id_reserva' => $response['Datos']['IdReserva']]);
+                //Create Student -- maybe
                 return redirect()->route('leads.index')->with('success', 'Lead actualizado');
             } else {
                 $lead->update(['estado_id' => $last_state]);
@@ -647,5 +649,23 @@ class LeadController extends Controller
             'observaciones' => $observaciones,
         ]);
 
+    }
+
+    public function downloadTemplate() {
+        $filePath = storage_path(self::TEMPALTE_ROUTE);
+
+        abort_unless(
+            file_exists($filePath) && is_readable($filePath),
+            404,
+            'No se encuentra la plantilla o no se puede leer.'
+        );
+
+        return response()->download(
+            $filePath,
+            'leads.xlsx',
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        );
     }
 }

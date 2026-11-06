@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Seguimiento;
 use App\Models\Lead;
+use App\Models\SeguimientoEstudiante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +33,35 @@ class SeguimientoController extends Controller
 
         // actualizar ultimo contacto en lead
         $lead->update([
+            'ultimo_contacto' => now()
+        ]);
+
+        return back();
+    }
+
+    public function storeDropoff(Request $request, SeguimientoEstudiante $dropoff)
+    {
+        $user = Auth::user();
+
+        // Solo jefe o dueño del lead
+        if ($user->rol === 'ASESOR' && $dropoff->usuario_id != $user->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'tipo' => 'required|in:LLAMADA,WHATSAPP,EMAIL,OTRO',
+            'resultado' => 'required|in:NO_RESPONDE,INTERESADO,NO_INTERESADO,SEGUIMIENTO',
+            'observacion' => 'nullable|string'
+        ]);
+
+        $dropoff->seguimientos()->create([
+            ...$validated,
+            'usuario_id' => $user->id,
+            'fecha_contacto' => now()
+        ]);
+
+        // actualizar ultimo contacto en lead
+        $dropoff->update([
             'ultimo_contacto' => now()
         ]);
 

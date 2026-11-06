@@ -11,3 +11,4 @@ require __DIR__.'/settings.php';
 require __DIR__.'/lead.php';
 require __DIR__.'/user.php';
 require __DIR__.'/promo.php';
+require __DIR__.'/dropoff.php';

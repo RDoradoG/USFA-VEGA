@@ -153,7 +153,7 @@ const canEdit = (isJefe || isOwner) && ! alreadyDone;
         <!-- SEGUIMIENTOS -->
         <div class="bg-white p-4 rounded shadow" v-if="! alreadyDone">
 
-          <Seguimientos :lead="lead" />
+          <Seguimientos :lead="lead" :dropoff="false" />
 
         </div>
 
