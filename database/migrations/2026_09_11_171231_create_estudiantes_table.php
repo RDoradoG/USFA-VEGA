@@ -28,7 +28,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('estudiante_id')->constrained('estudiantes')->cascadeOnDelete();
             $table->foreignId('sede_id')->constrained('sedes')->cascadeOnDelete();
-            $table->foreignId('carrera_id')->constrained('carreras')->cascadeOnDelete();
+            $table->foreignId('carrera_simbolo_id')->constrained('carrera_simbolos')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -64,7 +64,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('seguimiento_estudiante_id')->constrained('seguimiento_estudiantes')->cascadeOnDelete();
             $table->foreignId('sede_id')->constrained('sedes')->cascadeOnDelete();
-            $table->foreignId('carrera_id')->constrained('carreras')->cascadeOnDelete();
+            $table->foreignId('carrera_simbolo_id')->constrained('carrera_simbolos')->cascadeOnDelete();
             $table->foreignId('seguimiento_tipo_id')->constrained('seguimiento_tipos')->cascadeOnDelete();
             //$table->foreignId('seguimiento_estado_id')->constrained('seguimiento_estados')->cascadeOnDelete();
             $table->timestamps();

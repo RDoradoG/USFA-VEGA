@@ -22,7 +22,13 @@ class Carrera extends Model
         'activo' => 'boolean'
     ];
 
-    public function leads()
+    public function carreraSimbolos()
+    {
+        return $this->hasMany(carreraSimbolo::class);
+    }
+
+
+    /*public function leads()
     {
         return $this->hasMany(Lead::class);
     }
@@ -35,5 +41,5 @@ class Carrera extends Model
     public function estudianteCarreras()
     {
         return $this->hasMany(EstudianteCarrera::class);
-    }
+    }*/
 }

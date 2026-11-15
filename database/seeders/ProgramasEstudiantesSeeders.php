@@ -2,18 +2,44 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class ProgramasSeeders extends Seeder
+class EstudiantesSeeders extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $current_date = date('Y-m-d H:i:s');
+        $this->programs(date('Y-m-d H:i:s'));
+        $this->students();
+    }
+
+    private function students(): void
+    {
+        DB::table('seguimiento_estados')->insert([
+            ['nombre' => 'Nuevo', 'color' => 'grey', 'orden' => 1],
+            ['nombre' => 'Sin contactar', 'color' => 'orange', 'orden' => 2],
+            ['nombre' => 'En Proceso', 'color' => 'yellow', 'orden' => 3],
+            ['nombre' => 'Recuperado', 'color' => 'green', 'orden' => 4],
+            ['nombre' => 'Perdido', 'color' => 'red', 'orden' => 5]
+        ]);
+
+        DB::table('seguimiento_tipos')->insert([
+            ['nombre' => 'Abandono'],
+            ['nombre' => 'Deserción']
+        ]);
+
+        DB::table('desercion_tipos')->insert([
+            ['nombre' => 'Sin Asignación'],
+            ['nombre' => 'Sin Nota'],
+            ['nombre' => 'Nota']
+        ]);
+    }
+
+    private function programs(string $current_date): void
+    {
 
         DB::table('programas')->insert([
             ['nombre' => '4800', 'anio' => 2010, 'activo' => 0, 'created_at' => $current_date, 'updated_at' => $current_date],
@@ -25,7 +51,7 @@ class ProgramasSeeders extends Seeder
             ['nombre' => 'Ciencias de la Educación', 'activo' => 0, 'created_at' => $current_date, 'updated_at' => $current_date]//12
         ]);
 
-        DB::table('carrera_simbolo')->insert([
+        DB::table('carrera_simbolos')->insert([
             ['simbolo' => 'ADM', 'carrera_id' => 1, 'programa_id' => 1, 'activo' => 0, 'external_id' => 1, 'created_at' => $current_date, 'updated_at' => $current_date],
             ['simbolo' => 'EDU', 'carrera_id' => 12, 'programa_id' => 1, 'activo' => 0, 'external_id' => 2, 'created_at' => $current_date, 'updated_at' => $current_date],
             ['simbolo' => 'COM', 'carrera_id' => 5, 'programa_id' => 1, 'activo' => 0, 'external_id' => 3, 'created_at' => $current_date, 'updated_at' => $current_date],

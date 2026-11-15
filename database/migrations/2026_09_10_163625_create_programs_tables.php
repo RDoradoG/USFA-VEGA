@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('carrera_simbolo', function (Blueprint $table) {
+        Schema::create('carrera_simbolos', function (Blueprint $table) {
             $table->id();
             $table->string('simbolo');
             $table->foreignId('carrera_id')->constrained('carreras')->cascadeOnDelete();
