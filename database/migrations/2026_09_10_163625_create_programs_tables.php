@@ -11,10 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('carreras', function (Blueprint $table) {
-            $table->dropColumn('external_id');
-        });
-
         Schema::create('programas', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
@@ -39,10 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carrera_simbolo');
+        Schema::dropIfExists('carrera_simbolos');
         Schema::dropIfExists('programas');
-        Schema::table('carreras', function (Blueprint $table) {
-            $table->string('external_id')->nullable()->after('activo');
-        });
     }
 };
