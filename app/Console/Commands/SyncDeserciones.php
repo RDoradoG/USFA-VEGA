@@ -51,7 +51,7 @@ class SyncDeserciones extends Command
             $sedes = SedeController::getAllMap();
 
             $this->info('Obteniendo carreras...');
-            $carreras = CarreraController::getAllMap();
+            $carreras = CarreraController::getAllSymbols();
 
             $this->info('Obteniendo tipos de deserciones...');
             $attritionTypes = DesercionTipoController::getAllMap();

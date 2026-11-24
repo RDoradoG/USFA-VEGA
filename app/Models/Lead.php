@@ -21,7 +21,7 @@ class Lead extends Model
         'genero',
         'ciudad',
         'sede_id',
-        'carrera_id',
+        'carrera_simbolo_id',
         'horario_id',
         'estado_id',
         'usuario_id',
@@ -39,7 +39,7 @@ class Lead extends Model
         'ultimo_contacto' => 'datetime'
     ];
 
-    protected $with = ['estado', 'sede', 'carrera', 'asesor'];
+    protected $with = ['estado', 'sede', 'carreraSimbolo', 'asesor'];
 
     protected $appends = ['full_name'];
 
@@ -74,9 +74,9 @@ class Lead extends Model
         return $this->belongsTo(Sede::class);
     }
 
-    public function carrera()
+    public function carreraSimbolo()
     {
-        return $this->belongsTo(Carrera::class);
+        return $this->belongsTo(CarreraSimbolo::class);
     }
 
     public function usuario()

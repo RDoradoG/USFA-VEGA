@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Fuente;
 use App\Models\Promocion;
 use App\Models\HistoryLead;
+use App\Models\CarreraSimbolo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use libphonenumber\PhoneNumberUtil;
@@ -109,7 +110,7 @@ class LeadController extends Controller
 
         $query = Lead::with([
             'sede',
-            'carrera',
+            'carreraSimbolo.carrera',
             'horario',
             'estado',
             'usuario',
@@ -147,7 +148,8 @@ class LeadController extends Controller
 
         switch ($orderBy) {
             case 'carrera':
-                $query->leftJoin('carreras', 'leads.carrera_id', '=', 'carreras.id')
+                $query->leftJoin('carrera_simbolos', 'leads.carrera_simbolo_id', '=', 'carrera_simbolos.id')
+                    ->Join('carreras', 'carrera_simbolos.carrera_id', '=', 'carreras.id')
                     ->orderBy('carreras.nombre', $orderDirection);
                 break;
 
@@ -201,6 +203,7 @@ class LeadController extends Controller
         ]);
     }
 
+    
     public function store(Request $request)
     {
         $validated = $request->validate($this->getValidations($request), $this->messages);
@@ -211,6 +214,8 @@ class LeadController extends Controller
 
         $validated['fecha_registro'] = now();
         $validated['ultimo_contacto'] = now();
+
+        $validated['carrera_simbolo_id'] = $this->getCarreraSimboloId($validated['carrera_id']);
 
         $lead = Lead::create($validated);
 
@@ -228,7 +233,7 @@ class LeadController extends Controller
         return Inertia::render('Leads/Edit', [
             'lead' => $lead->load([
                 'sede',
-                'carrera',
+                'carreraSimbolo.carrera',
                 'horario',
                 'estado',
                 'usuario',
@@ -236,7 +241,7 @@ class LeadController extends Controller
                 'seguimientos.usuario'
             ]),
             'sedes' => Sede::all(),
-            'carreras' => Carrera::all(),
+            'carreras' => Carrera::where('activo', 1)->get(),
             'horarios' => Horario::all(),
             'estados' => Estado::where('id', '!=', 6)->orderBy('orden')->get(),
             'usuarios' => User::where('activo', 1)->where('rol', '!=', 'SUPERADMIN')->get(),
@@ -249,32 +254,10 @@ class LeadController extends Controller
 
     public function getRecordsApi(Request $request)
     {
-
         return response()->json(Lead::get());
-        $leads = DB::table('leads')
-            ->leftJoin('sedes', 'sedes.id', '=', 'leads.sede_id')
-            ->leftJoin('carreras', 'carreras.id', '=', 'leads.carrera_id')
-            ->leftJoin('estados', 'estados.id', '=', 'leads.estado_id')
-            ->leftJoin('fuentes', 'fuentes.id', '=', 'leads.fuente_id')
-            ->leftJoin('horarios', 'horarios.id', '=', 'leads.horario_id')
-            ->leftJoin('promociones', 'promociones.id', '=', 'leads.promocion_id')
-            ->leftJoin('usuarios', 'usuarios.id', '=', 'leads.usuario_id')
-            ->select([
-                'leads.*',
-                'sedes.nombre as sede',
-                'carreras.nombre as carrera',
-                'estados.nombre as estado',
-                'fuentes.nombre as fuente',
-                'horarios.nombre as horario',
-                'promociones.nombre as promocion',
-                'usuarios.nombre as asesor'
-            ])
-            ->get();
-
-        return response()->json($leads);
     }
 
-    public function updateApi(Request $request, $id)
+    public function updateApi(Request $request, int $id)
     {
         $lead = Lead::where('id', $id)->firstOrFail();
 
@@ -318,6 +301,24 @@ class LeadController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Carrera
+        |--------------------------------------------------------------------------
+        */
+        if ($request->filled('carrera')) {
+            $carreraSimbolo = CarreraSimbolo::where(
+                'external_id',
+                $request->input('carrera')
+            )->firstOrFail();
+
+            $changes['carrera_simbolo_id'] = $carreraSimbolo->id;
+
+            $carrera = Carrera::where('id', $carreraSimbolo->carrera_id)->firstOrFail();
+
+            $messages[] = "la carrera a {$carrera->nombre}";
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Relaciones
         |--------------------------------------------------------------------------
         */
@@ -327,13 +328,6 @@ class LeadController extends Controller
                 'column' => 'external_id',
                 'lead_column' => 'sede_id',
                 'label' => 'la sede',
-                'display' => 'nombre',
-            ],
-            'carrera' => [
-                'model' => Carrera::class,
-                'column' => 'external_id',
-                'lead_column' => 'carrera_id',
-                'label' => 'la carrera',
                 'display' => 'nombre',
             ],
             'horario' => [
@@ -404,13 +398,15 @@ class LeadController extends Controller
         $mensajes = [];
         $last_state = $lead->estado_id;
 
+        $validated['carrera_simbolo_id'] = $this->getCarreraSimboloId($validated['carrera_id']);
+
         if ($lead->estado_id != $validated['estado_id']) $mensajes[] = 'el estado a ' . Estado::where('id', $validated['estado_id'])->firstOrFail()->nombre;
         if ($lead->usuario_id != $validated['usuario_id']) $mensajes[] = 'el asesor a ' . User::where('id', $validated['usuario_id'])->firstOrFail()->nombre;
         if ($lead->fuente_id != $validated['fuente_id']) $mensajes[] = 'la fuente a ' . Fuente::where('id', $validated['fuente_id'])->firstOrFail()->nombre;
         if ($lead->interes_nivel != $validated['interes_nivel']) $mensajes[] = 'el nivel de interés a ' . $validated['interes_nivel'];
         if ($lead->promocion_id != $validated['promocion_id']) $mensajes[] = 'la promoción a ' . Promocion::where('id', $validated['promocion_id'])->firstOrFail()->nombre;
         if ($lead->sede_id != $validated['sede_id']) $mensajes[] = 'la sede a ' . Sede::where('id', $validated['sede_id'])->firstOrFail()->nombre;
-        if ($lead->carrera_id != $validated['carrera_id']) $mensajes[] = 'la carrera a ' . Carrera::where('id', $validated['carrera_id'])->firstOrFail()->nombre;
+        if ($lead->carrera_simbolo_id != $validated['carrera_simbolo_id']) $mensajes[] = 'la carrera a ' . Carrera::where('id', $validated['carrera_id'])->firstOrFail()->nombre;
         if ($lead->horario_id != $validated['horario_id']) $mensajes[] = 'el horario a ' . Horario::where('id', $validated['horario_id'])->firstOrFail()->nombre;
         if ($lead->ciudad != $validated['ciudad']) $mensajes[] = 'la ciudad a ' . $validated['ciudad'];
     
@@ -427,7 +423,7 @@ class LeadController extends Controller
             $last_names = $lead->apellidos;
             $genre = $lead->genero == 'Masculino' ? true : false;
             $id_sede = Sede::where('id', $lead->sede_id)->firstOrFail()->external_id;
-            $id_carrera = Carrera::where('id', $lead->carrera_id)->firstOrFail()->external_id;
+            $id_carrera = CarreraSimbolo::where('id', $lead->carrera_simbolo_id)->firstOrFail()->external_id;
 
             $promocion = Promocion::where('id', $lead->promocion_id)->first();
 
@@ -584,6 +580,8 @@ class LeadController extends Controller
 
         $observaciones = $row[15] ?? null;
 
+        $carreraSimbolo = null;
+
         if (empty($nombre)) throw new \Exception("Nombre vacío");
         if (empty($apellidos)) throw new \Exception("Apellidos vacio");
         if (empty($celular)) throw new \Exception("Celular vacío");
@@ -610,6 +608,9 @@ class LeadController extends Controller
 
         $sede = Sede::where('nombre', $sede_name)->first();
         $carrera = Carrera::where('nombre', $carrera_name)->first();
+
+        if (!is_null($carrera)) $carreraSimbolo = CarreraSimbolo::where('carrera_id', $carrera->id)->where('activo', 1)->first();
+
         $horario = Horario::where('nombre', $horario_name)->first();
         $estado = Estado::where('nombre', $estado_name)->first();
         $fuente = Fuente::where('nombre', $fuente_name)->first();
@@ -622,7 +623,7 @@ class LeadController extends Controller
         if ($genero != 'Masculino' && $genero != 'Femenino') throw new \Exception("Genero erroneo");
 
         $sede_id = $sede->id;
-        $carrera_id = is_null($carrera) ? null : $carrera->id;
+        $carreraSimbolo_id = is_null($carreraSimbolo) ? null : $carreraSimbolo->id;
         $horario_id = is_null($horario) ? null : $horario->id;
         $estado_id = $estado->id;
         $fuente_id = $fuente->id;
@@ -637,7 +638,7 @@ class LeadController extends Controller
             'ciudad' => $ciudad,
 
             'sede_id' => $sede_id,
-            'carrera_id' => $carrera_id,
+            'carrera_simbolo_id' => $carreraSimbolo_id,
             'horario_id' => $horario_id,
             'estado_id' => $estado_id,
             'fuente_id' => $fuente_id,
@@ -650,6 +651,11 @@ class LeadController extends Controller
         ]);
 
     }
+
+    private function getCarreraSimboloId(int $carrera_id) {
+        return CarreraSimbolo::where('carrera_id', $carrera_id)->where('activo', 1)->firstOrFail()->id;
+    }
+
 
     public function downloadTemplate() {
         $filePath = storage_path(self::TEMPALTE_ROUTE);

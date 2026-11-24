@@ -122,6 +122,7 @@ const getRows = async (search, estado, usuario, interes, fuente, fechaDesde, fec
 
   getAPIs('leads', search, page, 10, orderBy, orderDirection, filter)
   .then(response => {
+    console.log(response)
     leads.value = response
   })
   .catch(error => console.error(error))
@@ -392,7 +393,7 @@ const runCSV = async () => {
             </td>
 
             <td class="px-4 py-2">
-              {{ lead.carrera?.nombre }}
+              {{ lead.carrera_simbolo?.carrera?.nombre }}
             </td>
 
             <!-- ESTADO -->

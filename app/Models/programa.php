@@ -20,6 +20,6 @@ class programa extends Model
 
     public function carreraSimbolos()
     {
-        return $this->hasMany(carreraSimbolo::class);
+        return $this->hasMany(CarreraSimbolo::class);
     }
 }

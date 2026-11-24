@@ -42,14 +42,14 @@ class EstudianteController extends Controller
         if (!is_null($carrera_id) && !is_null($sede_id)) {
             $existStudentAssign = EstudianteCarrera::where('estudiante_id', $studentDB->id)
                             ->where('sede_id', $sede_id)
-                            ->where('carrera_id', $carrera_id)
+                            ->where('carrera_simbolo_id', $carrera_id)
                             ->exists();
 
             if (!$existStudentAssign) {
                 EstudianteCarrera::create([
                     'estudiante_id' => $studentDB->id,
                     'sede_id' => $sede_id,
-                    'carrera_id' => $carrera_id
+                    'carrera_simbolo_id' => $carrera_id
                 ]);
             }
 

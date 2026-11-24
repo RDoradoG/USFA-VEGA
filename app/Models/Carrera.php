@@ -14,8 +14,7 @@ class Carrera extends Model
     protected $fillable = [
         'nombre',
         'descripcion',
-        'activo',
-        'external_id'
+        'activo'
     ];
 
     protected $casts = [
@@ -24,22 +23,6 @@ class Carrera extends Model
 
     public function carreraSimbolos()
     {
-        return $this->hasMany(carreraSimbolo::class);
+        return $this->hasMany(CarreraSimbolo::class);
     }
-
-
-    /*public function leads()
-    {
-        return $this->hasMany(Lead::class);
-    }
-
-    public function abandonoDeserciones()
-    {
-        return $this->hasMany(AbandonoDesercion::class);
-    }
-
-    public function estudianteCarreras()
-    {
-        return $this->hasMany(EstudianteCarrera::class);
-    }*/
 }

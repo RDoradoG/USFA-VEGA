@@ -11,20 +11,14 @@ class AbandonoDesercion extends Model
     protected $fillable = [
         'seguimiento_estudiante_id',
         'sede_id',
-        'carrera_id',
-        'seguimiento_tipo_id'//,
-       //'seguimiento_estado_id'
+        'carrera_simbolo_id',
+        'seguimiento_tipo_id'
     ];
 
     public function seguimientoTipo()
     {
         return $this->belongsTo(SeguimientoTipo::class);
     }
-
-    /*public function seguimientoEstado()
-    {
-        return $this->belongsTo(SeguimientoEstado::class);
-    }*/
 
     public function seguimientoDeserciones()
     {
@@ -36,8 +30,8 @@ class AbandonoDesercion extends Model
         return $this->belongsTo(Sede::class);
     }
 
-    public function carrera()
+    public function carreraSimbolo()
     {
-        return $this->belongsTo(Carrera::class);
+        return $this->belongsTo(CarreraSimbolo::class);
     }
 }

@@ -51,7 +51,7 @@ class SyncAbandonos extends Command
             $sedes = SedeController::getAllMap();
 
             $this->info('Obteniendo carreras...');
-            $carreras = CarreraController::getAllMap();
+            $carreras = CarreraController::getAllSymbols();
 
             $this->info("Total de Abandonos: {$total}");
             $this->output->progressStart($total);

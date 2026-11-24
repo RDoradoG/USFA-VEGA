@@ -42,7 +42,7 @@ class AbandonoDesercionController extends Controller
 
             $abandono_desercion = AbandonoDesercion::where('seguimiento_estudiante_id', $seguimiento_estudiante->id)
                 ->where('sede_id', $sede_id)
-                ->where('carrera_id', $carrera_id)
+                ->where('carrera_simbolo_id', $carrera_id)
                 ->where('seguimiento_tipo_id', $dropout_type)
                 ->first();
 
@@ -50,7 +50,7 @@ class AbandonoDesercionController extends Controller
                 $abandono_desercion = AbandonoDesercion::create([
                     'seguimiento_estudiante_id' => $seguimiento_estudiante->id,
                     'sede_id' => $sede_id,
-                    'carrera_id' => $carrera_id,
+                    'carrera_simbolo_id' => $carrera_id,
                     'seguimiento_tipo_id' => $dropout_type//,
                     //'seguimiento_estado_id' => self::STATE_INIT_ID,
                 ]);

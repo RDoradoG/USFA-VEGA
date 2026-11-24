@@ -2,7 +2,6 @@
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import Selectlist from '@/components/ui/selectlist/Selectlist.vue';
-//import Datepicker from '@/components/ui/datepicker/Datepicker.vue';
 import Textarea from '@/components/ui/textarea/Textarea.vue';
 import { useForm, usePage  } from '@inertiajs/vue3';
 import dayjs from 'dayjs'
@@ -27,11 +26,8 @@ const propsDef = defineProps({
 const isJefe = user.rol === 'JEFE';
 const isOwner = propsDef.lead?.usuario_id == user.id || propsDef.lead === undefined;
 const alreadyDone = propsDef.lead?.estado_id == 5;
-
 const canChangeState = user.rol === 'JEFE' || (isOwner && propsDef.lead !== undefined)
-
 const canEdit = (isJefe || isOwner) && ! alreadyDone;
-//const canCreate = isJefe;
 
 const genreOptions = [
   {id: 'Masculino', value: 'Masculino'},
@@ -53,7 +49,7 @@ const form = useForm({
   ciudad: propsDef.lead?.ciudad || '',
 
   sede_id: propsDef.lead?.sede_id || '',
-  carrera_id: propsDef.lead?.carrera_id || '',
+  carrera_id: propsDef.lead?.carrera_simbolo.carrera_id || '',
   horario_id: propsDef.lead?.horario_id || '',
 
   estado_id: propsDef.lead?.estado_id || '1',
@@ -186,16 +182,6 @@ const submit = () => {
         <Label>Promoción</Label>
         <Selectlist v-model="form.promocion_id" :options="promociones" :key="'id'" :value="'nombre'" :disabled="!canEdit" />
       </div>
-
-      <!--div>
-        <Label>Fecha registro</Label>
-        <Input v-model="form.fecha_registro" placeholder="dd/mm/aaaa --:--" :disabled="true" />
-      </div>
-
-      <div>
-        <Label>Último contacto</Label>
-        <Input v-model="form.ultimo_contacto" placeholder="dd/mm/aaaa --:--" :disabled="true" />
-      </div-->
     </div>
 
     <!-- OBSERVACIONES -->

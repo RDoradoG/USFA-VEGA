@@ -11,7 +11,7 @@ class EstudianteCarrera extends Model
     protected $fillable = [
         'estudiante_id',
         'sede_id',
-        'carrera_id'
+        'carrera_simbolo_id'
     ];
 
     public function estudiante()

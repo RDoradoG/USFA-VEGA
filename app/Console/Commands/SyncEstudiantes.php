@@ -49,7 +49,7 @@ class SyncEstudiantes extends Command
             $sedes = SedeController::getAllMap();
 
             $this->info('Obteniendo carreras...');
-            $carreras = CarreraController::getAllMap();
+            $carreras = CarreraController::getAllSymbols();
 
             $this->info("Total de estudiantes: {$total}");
             $this->output->progressStart($total);

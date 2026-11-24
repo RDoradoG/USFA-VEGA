@@ -36,7 +36,7 @@ class PagoController extends Controller
         $new_lead = [];
 
         if (!empty($request->monto_total)) $new_lead['monto_inscripcion'] = $request->monto_total;
-        if ($lead->estado_id != self::STATE_ID) $new_lead['estado_id'] =  self::STATE_ID;
+        if ($lead->estado_id != self::STATE_ID) $new_lead['estado_id'] = self::STATE_ID;
 
         if (!empty($new_lead)) $lead->update($new_lead);
 

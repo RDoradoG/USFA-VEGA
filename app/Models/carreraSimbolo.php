@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class carreraSimbolo extends Model
+class CarreraSimbolo extends Model
 {
     protected $table = 'carrera_simbolos';
 
